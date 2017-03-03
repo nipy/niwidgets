@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# notebooks
+.ipnyb_checkpoints
+
 # Distribution / packaging
 .Python
 env/
@@ -56,3 +59,5 @@ docs/_build/
 
 # PyBuilder
 target/
+
+\.ipynb_checkpoints/
