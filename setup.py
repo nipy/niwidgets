@@ -21,7 +21,7 @@ setup(
     author='Jan Freyberg',
     author_email='jan.freyberg@gmail.com',
     packages=['niwidgets'],
-    install_requires=['ipywidgets'],
+    install_requires=['ipywidgets', 'nilearn', 'nibabel'],
     # Include the template file
     package_data={
         '': ['data/*nii*']
