@@ -15,4 +15,4 @@ pip install nibabel nilearn
 Check out the examples using the code in this notebook here:
 https://github.com/janfreyberg/niwidgets/blob/master/visualisation_wrapper.ipynb
 
-By [Jan Freyberg](http://www.twitter.com/janfreyberg) and [Bjoern Soergel](http://www.ast.cam.ac.uk/people/bjoern.soergel)
+By [Jan Freyberg](http://www.twitter.com/janfreyberg) and [Bjoern Soergel](http://www.ast.cam.ac.uk/~bs538/)
