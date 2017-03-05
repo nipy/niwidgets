@@ -14,5 +14,6 @@ pip install nibabel nilearn
 
 Check out the examples using the code in this notebook here:
 https://github.com/janfreyberg/niwidgets/blob/master/visualisation_wrapper.ipynb
+(you need to run the notebook on your local machine to use the interactive features).
 
 By [Jan Freyberg](http://www.twitter.com/janfreyberg) and [Bjoern Soergel](http://www.ast.cam.ac.uk/~bs538/)
