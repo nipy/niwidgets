@@ -1,5 +1,4 @@
 from __future__ import print_function
-import nilearn.plotting as nip
 import nibabel as nib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -73,20 +72,30 @@ class NiWidget:
                 kwargs.pop('colormap', None)
             else:
                 # if cmap is not valid for plot func, try and use it anyways
-                self.colormap = kwargs['colormap']  # set this for later
+                self.colormap = kwargs['colormap']
                 kwargs.pop('colormap', None)
                 plt.set_cmap(self.colormap)
+
         # reconstruct manually added x-y-z-sliders:
         if 'cut_coords' in inspect.getargspec(self.plotting_func)[0] \
                 and 'x' in kwargs.keys():
+
             # add the x-y-z as cut_coords
-            kwargs['cut_coords'] = [kwargs[label] for label in ['x', 'y', 'z']]
+            if 'display_mode' not in kwargs.keys() \
+                    or not any([label in kwargs['display_mode']
+                                for label in ['x', 'y', 'z']]):
+                # If no xyz combination of displaymodes was requested:
+                kwargs['cut_coords'] = [kwargs[label]
+                                        for label in ['x', 'y', 'z']]
+            else:
+                kwargs['cut_coords'] = [kwargs[label]
+                                        for label in ['x', 'y', 'z']
+                                        if label in kwargs['display_mode']]
             # remove x-y-z from kwargs
             [kwargs.pop(label, None) for label in ['x', 'y', 'z']]
         # Actually plot the image
         self.plotting_func(data, **kwargs)
         plt.show()
-        pass
 
     def custom_plotter(self, plotting_func, **kwargs):
         """
@@ -111,7 +120,8 @@ class NiWidget:
             # These will be removed inside the wrapper
             for dim, label in enumerate(['x', 'y', 'z']):
                 if label not in kwargs.keys():
-                    kwargs[label] = (0, self.data.shape[dim] - 1)
+                    # cut_coords should be given in MNI coordinates
+                    kwargs[label] = (-90, 90)
 
         # Create the widget:
         interact(self._custom_plot_wrapper, data=fixed(self.data), **kwargs)
