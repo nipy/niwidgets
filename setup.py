@@ -18,7 +18,7 @@ setup(
     download_url='https://github.com/janfreyberg/niwidgets' +
         version,
     # Author details
-    author='Jan Freyberg',
+    author='Jan Freyberg & Bjoern Soergel',
     author_email='jan.freyberg@gmail.com',
     packages=['niwidgets'],
     install_requires=['ipywidgets', 'nilearn', 'nibabel'],
