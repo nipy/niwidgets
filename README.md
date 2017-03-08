@@ -41,8 +41,10 @@ my_widget.nifti_plotter(plotting_func=nip.plot_glass_brain)
 
 By default, this will give you the following interactive features:
 - selecting a colormap
-- if supported, x-y-x sliders (e.g. for `nip.plot_img`)
+- if supported by the plotting function, x-y-x sliders (e.g. for `nip.plot_img`)
 
-Hopefully we will be able to add more interactive features in the future. If you have any suggestions for plot features to be added, please let us know!
+You can, however, always provide features you would like to have interactive yourself. This follows the normal ipywidgets format. For example, if you provide a list of strings for a keyword argument, this becomes a drop-down menu. If you provide a tuple of two numbers, this becomes a slider. Take a look at some examples we have in [this notebook](https://github.com/janfreyberg/niwidgets/blob/master/visualisation_wrapper.ipynb) (you need to run the notebook on your local machine to use the interactive features).
+
+Hopefully we will be able to add more default interactive features in the future. If you have any suggestions for plot features to be added, please let us know!
 
 By [Jan Freyberg](http://www.twitter.com/janfreyberg) and [Bjoern Soergel](http://www.ast.cam.ac.uk/~bs538/)
