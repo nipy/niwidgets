@@ -1,9 +1,9 @@
 name: niwidget-test
 
 dependencies:
-    - matplotlib
-    - nibabel
-    - nilearn
-    - ipywidgets
-    pip:
-        - git+git://github.com/janfreyberg/niwidgets
+  - python=3.5
+  - matplotlib
+  - nibabel
+  - nilearn
+  - ipywidgets
+  
