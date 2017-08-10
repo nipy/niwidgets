@@ -1,6 +1,4 @@
 numpy==1.13.1
 scipy==0.19.1
-setuptools==36.2.2.post20170725
 matplotlib==2.0.2
-cortex==0.12a0
 nibabel==2.1.0
