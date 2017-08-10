@@ -5,6 +5,7 @@ import numpy as np
 from ipywidgets import interact, fixed
 import os
 import inspect
+import scipy.ndimage
 
 
 class NiWidget:
@@ -28,18 +29,34 @@ class NiWidget:
         plots x,y,z slices
         """
         fig, axes = plt.subplots(1, 3, figsize=figsize)
+        for axis in axes:
+            axis.set_facecolor('black')
         axes[0].imshow(np.rot90(data[:, y, :]), cmap=colormap)
         axes[1].imshow(np.rot90(data[x, :, :]), cmap=colormap)
         axes[2].imshow(np.rot90(data[:, :, z]), cmap=colormap)
         plt.show()
 
-    def default_plotter(self, **kwargs):
+    def default_plotter(self, mask_background=True, **kwargs):
         """
         basic plot function to be used if no custom function is specified
         """
 
         # load data in advance
-        self.data = nib.load(self.filename).dataobj
+        self.data = nib.load(self.filename).dataobj.get_unscaled()
+
+        # mask the background
+        if mask_background:
+            labels, n_labels = scipy.ndimage.measurements.label(
+                (np.round(self.data) == 0)
+                )
+            mask_labels = [lab for lab in range(1, n_labels+1)
+                           if (np.any(labels[[0, -1], :, :] == lab) |
+                           np.any(labels[:, [0, -1], :] == lab) |
+                           np.any(labels[:, :, [0, -1]] == lab))
+                           ]
+            self.data = np.ma.masked_where(
+                np.isin(labels, mask_labels), self.data
+                )
 
         # set default x y z values
         for dim, label in enumerate(['x', 'y', 'z']):
