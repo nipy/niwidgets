@@ -10,7 +10,7 @@ import scipy.ndimage
 
 class NiftiWidget:
     """
-    creates interactive NI plots using ipywidgets
+    Turns .nii files into interactive plots using ipywidgets.
     """
 
     def __init__(self, filename):
@@ -104,7 +104,7 @@ class NiftiWidget:
         """
         Plots x,y,z slices.
 
-        This function is called by 
+        This function is called by
         """
         coords = [x, y, z]
         views = ['Sagittal', 'Coronal', 'Axial']

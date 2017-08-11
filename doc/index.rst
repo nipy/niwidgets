@@ -1,7 +1,7 @@
 .. niwidgets documentation master file, created by
 
 
-Welcome to ssvepy.
+Make your neuroimaging plots interactive.
 ==================
 
 ``niwidgets`` This package provides easy and general wrappers to display interactive widgets that visualise standard-format neuroimaging data, using new functions and standard functions from other libraries.

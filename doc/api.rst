@@ -1,10 +1,9 @@
 API
 ===
 
-The main class you will be working with if you're using this package is the
-``Ssvep`` class:
+The only class so far is the ``NiftiWidget`` class:
 
-.. currentmodule:: ssvepy
+.. currentmodule:: niwidgets
 
 .. autosummary::
     :toctree: api
