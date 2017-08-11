@@ -139,32 +139,81 @@
 </tr>
 </tbody>
 </table>
-<dl class="method">
-<dt id="niwidgets.NiftiWidget.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niwidgets/niwidget.html#NiftiWidget.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#niwidgets.NiftiWidget.__init__" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+</dd></dl>
 
+<hr class="docutils" />
 <p class="rubric">Methods</p>
+<p>These are the methods that are added by niwidgets. All methods, including the inherited ones, are at the end of the page.</p>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#niwidgets.NiftiWidget.__init__" title="niwidgets.NiftiWidget.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(filename)</td>
-<td></td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">nifti_plotter</span></code>([plotting_func,&nbsp;colormap,&nbsp;figsize])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#niwidgets.NiftiWidget.nifti_plotter" title="niwidgets.NiftiWidget.nifti_plotter"><code class="xref py py-obj docutils literal"><span class="pre">nifti_plotter</span></code></a>([plotting_func,&nbsp;colormap,&nbsp;figsize])</td>
 <td>This is the main method for this widget.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">surface_projection</span></code>(pycortexid,&nbsp;pycortexxfm)</td>
+<tr class="row-even"><td><a class="reference internal" href="#niwidgets.NiftiWidget.surface_projection" title="niwidgets.NiftiWidget.surface_projection"><code class="xref py py-obj docutils literal"><span class="pre">surface_projection</span></code></a>(pycortexid,&nbsp;pycortexxfm)</td>
 <td>Creates interactive pycortex plots using ipywidgets.</td>
+</tr>
+</tbody>
+</table>
+<hr class="docutils" />
+<p class="rubric">Methods Details</p>
+<div class="method-div"><dl class="class">
+<dt>
+<em class="property">class </em><code class="descclassname">niwidgets.</code><code class="descname">NiftiWidget</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niwidgets/niwidget.html#NiftiWidget"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Turns .nii files into interactive plots using ipywidgets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The path to your <code class="docutils literal"><span class="pre">.nii</span></code> file. Can be a string, or a
+<code class="docutils literal"><span class="pre">PosixPath</span></code> from python3’s pathlib.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="niwidgets.NiftiWidget.nifti_plotter">
+<code class="descname">nifti_plotter</code><span class="sig-paren">(</span><em>plotting_func=None</em>, <em>colormap=None</em>, <em>figsize=(10</em>, <em>15)</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niwidgets/niwidget.html#NiftiWidget.nifti_plotter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#niwidgets.NiftiWidget.nifti_plotter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the main method for this widget.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>plotting_func</strong> (<em>function</em>) – A plotting function for .nii files, most likely</li>
+<li><strong>mask_background</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Whether the background should be masked (set to NA).
+This parameter only works in conjunction with the default
+plotting function (<cite>plotting_func=None</cite>). It finds clusters
+of values that round to zero and somewhere touch the edges
+of the image. These are set to NA. If you think you are
+missing data in your image, set this False.</li>
+<li><strong>colormap</strong> (<em>str | list</em>) – The matplotlib colormap that should be applied to the data.
+By default, the widget will allow you to pick from all that
+are available, but you can pass a string to fix the
+colormap or a list of strings to offer the user a few
+options.</li>
+<li><strong>figsize</strong> (<em>tup</em>) – The figure height and width for matplotlib, in inches.</li>
+<li><strong>you are providing a custom plot function</strong><strong>, </strong><strong>any kwargs you provide</strong> (<em>If</em>) – </li>
+<li><strong>nifti_plotter will be passed to that function.</strong> (<em>to</em>) – </li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-</div>
+<dl class="method">
+<dt id="niwidgets.NiftiWidget.surface_projection">
+<code class="descname">surface_projection</code><span class="sig-paren">(</span><em>pycortexid</em>, <em>pycortexxfm</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niwidgets/niwidget.html#NiftiWidget.surface_projection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#niwidgets.NiftiWidget.surface_projection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates interactive pycortex plots using ipywidgets.</p>
+<p>Input: the subject ID for a subject already in your pycortex database.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div></div>
 
 
     </div>
