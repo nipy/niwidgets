@@ -142,7 +142,9 @@ class NiftiWidget:
         # show the plot
         plt.show()
         # print the value at that point in case people need to know
-        print(f'Value at point {x}, {y}, {z}: {data[x, y, z]}')
+        print('Value at point {x}, {y}, {z}: {intensity}'.format(
+            x=x, y=y, z=z, intensity=data[x, y , z]
+        ))
 
 
     def _custom_plotter(self, plotting_func, **kwargs):
