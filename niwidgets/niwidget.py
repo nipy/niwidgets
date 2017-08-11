@@ -28,13 +28,34 @@ class NiWidget:
         """
         plots x,y,z slices
         """
+        coords = [x, y, z]
+        views = ['Sagittal', 'Coronal', 'Axial']
         fig, axes = plt.subplots(1, 3, figsize=figsize)
-        for axis in axes:
-            axis.set_facecolor('black')
-        axes[0].imshow(np.rot90(data[:, y, :]), cmap=colormap)
-        axes[1].imshow(np.rot90(data[x, :, :]), cmap=colormap)
-        axes[2].imshow(np.rot90(data[:, :, z]), cmap=colormap)
+        for subplot in range(3):
+            slice_obj = 3 * [slice(None)]
+            slice_obj[subplot] = coords[subplot]
+            plt.sca(axes[subplot])
+            axes[subplot].set_facecolor('black')
+            axes[subplot].set_title(views[subplot])
+            axes[subplot].tick_params(
+                axis='both', which='both', bottom='off', top='off', labelbottom='off', right='off', left='off', labelleft='off'
+                )
+            # fix the axis limits
+            axis_limits = [limit for i, limit in enumerate(data.shape)
+                           if i != subplot]
+            axes[subplot].set_xlim(0, axis_limits[0])
+            axes[subplot].set_ylim(0, axis_limits[1])
+            # plot the actual slice
+            plt.imshow(np.rot90(data[slice_obj], k=3), cmap=colormap)
+            # draw guides to show where the other two slices are
+            guide_positions = [data.shape[i] - val if i == 1 else val
+                               for i, val in enumerate(coords)
+                               if i != subplot]
+            plt.axvline(x=guide_positions[0], color='gray', alpha=0.8)
+            plt.axhline(y=guide_positions[1], color='gray', alpha=0.8)
+
         plt.show()
+        print(f'Value at point {x}, {y}, {z}: {data[x, y, z]}')
 
     def default_plotter(self, mask_background=True, **kwargs):
         """
