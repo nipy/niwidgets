@@ -8,7 +8,7 @@ import inspect
 import scipy.ndimage
 
 
-class NiWidget:
+class NiftiWidget:
     """
     creates interactive NI plots using ipywidgets
     """
@@ -19,14 +19,92 @@ class NiWidget:
             # for Python3 should have FileNotFoundError here
             raise IOError('file {} not found'.format(filename))
 
+        # TODO:
         # could also add a check here that input file is in one of the formats
         # that nibabel can read
 
         self.filename = filename
 
-    def plot_slices(self, data, x, y, z, colormap='viridis', figsize=(15, 5)):
+
+    def nifti_plotter(self, plotting_func=None, colormap=None, figsize=(10, 15),
+                      **kwargs):
         """
-        plots x,y,z slices
+        This is the main method for this widget.
+
+        Args
+        ----
+            plotting_func : function
+                    A plotting function for .nii files, most likely
+            mask_background : bool
+                    Whether the background should be masked (set to NA).
+                    This parameter only works in conjunction with the default
+                    plotting function (`plotting_func=None`). It finds clusters
+                    of values that round to zero and somewhere touch the edges
+                    of the image. These are set to NA. If you think you are
+                    missing data in your image, set this False.
+            colormap : str | list
+                    The matplotlib colormap that should be applied to the data.
+                    By default, the widget will allow you to pick from all that
+                    are available, but you can pass a string to fix the
+                    colormap or a list of strings to offer the user a few
+                    options.
+            figsize : tup
+                    The figure height and width for matplotlib, in inches.
+
+            If you are providing a custom plot function, any kwargs you provide
+            to nifti_plotter will be passed to that function.
+        """
+
+        # set default colormap options & add them to the kwargs
+        if colormap is None:
+            kwargs['colormap'] = ['viridis'] + \
+                sorted(m for m in plt.cm.datad if not m.endswith("_r"))
+        elif type(colormap) is str:
+            # fix cmap if only one given
+            kwargs['colormap'] = fixed(colormap)
+
+        kwargs['figsize'] = fixed(figsize)
+
+        if plotting_func is None:
+            self._default_plotter(**kwargs)
+        else:
+            self._custom_plotter(plotting_func, **kwargs)
+
+
+    def _default_plotter(self, mask_background=True, **kwargs):
+        """
+        Basic plot function to be used if no custom function is specified.
+
+        This is called by nifti_plotter, you shouldn't call it directly.
+        """
+
+        # load data in advance
+        self.data = nib.load(self.filename).dataobj.get_unscaled()
+
+        # mask the background
+        if mask_background:
+            labels, n_labels = scipy.ndimage.measurements.label(
+                (np.round(self.data) == 0))
+            mask_labels = [lab for lab in range(1, n_labels+1)
+                           if (np.any(labels[[0, -1], :, :] == lab) |
+                           np.any(labels[:, [0, -1], :] == lab) |
+                           np.any(labels[:, :, [0, -1]] == lab))]
+            self.data = np.ma.masked_where(
+                np.isin(labels, mask_labels), self.data)
+
+        # set default x y z values
+        for dim, label in enumerate(['x', 'y', 'z']):
+            if label not in kwargs.keys():
+                kwargs[label] = (0, self.data.shape[dim] - 1)
+
+        interact(self._plot_slices, data=fixed(self.data), **kwargs)
+
+
+    def _plot_slices(self, data, x, y, z, colormap='viridis', figsize=(15, 5)):
+        """
+        Plots x,y,z slices.
+
+        This function is called by 
         """
         coords = [x, y, z]
         views = ['Sagittal', 'Coronal', 'Axial']
@@ -55,102 +133,19 @@ class NiWidget:
             plt.axvline(x=guide_positions[0], color='gray', alpha=0.8)
             plt.axhline(y=guide_positions[1], color='gray', alpha=0.8)
 
+        # show the plot
         plt.show()
+        # print the value at that point in case people need to know
         print(f'Value at point {x}, {y}, {z}: {data[x, y, z]}')
 
-    def default_plotter(self, mask_background=True, **kwargs):
+
+    def _custom_plotter(self, plotting_func, **kwargs):
         """
-        basic plot function to be used if no custom function is specified
-        """
-
-        # load data in advance
-        self.data = nib.load(self.filename).dataobj.get_unscaled()
-
-        # mask the background
-        if mask_background:
-            labels, n_labels = scipy.ndimage.measurements.label(
-                (np.round(self.data) == 0)
-                )
-            mask_labels = [lab for lab in range(1, n_labels+1)
-                           if (np.any(labels[[0, -1], :, :] == lab) |
-                           np.any(labels[:, [0, -1], :] == lab) |
-                           np.any(labels[:, :, [0, -1]] == lab))
-                           ]
-            self.data = np.ma.masked_where(
-                np.isin(labels, mask_labels), self.data
-                )
-
-        # set default x y z values
-        for dim, label in enumerate(['x', 'y', 'z']):
-            if label not in kwargs.keys():
-                kwargs[label] = (0, self.data.shape[dim] - 1)
-
-        # set default colormap
-        if 'colormap' not in kwargs.keys():
-            kwargs['colormap'] = ['viridis'] + \
-                sorted(m for m in plt.cm.datad if not m.endswith("_r"))
-        elif len([kwargs['colormap']]) == 1:
-            # fix cmap if only one given
-            kwargs['colormap'] = fixed(kwargs['colormap'])
-
-        # set default figure size
-        if 'figsize' not in kwargs.keys():
-            kwargs['figsize'] = fixed((15, 5))
-
-        interact(self.plot_slices, data=fixed(self.data), **kwargs)
-
-    def _custom_plot_wrapper(self, data, **kwargs):
-        """
-        plot wrapper for custom function
-        """
-        # The following should provide a colormap option to most plots:
-        if 'colormap' in kwargs.keys():
-            if 'cmap' in inspect.getargspec(self.plotting_func)[0]:
-                # if cmap is valid argument to plot func, rename but keep
-                kwargs['cmap'] = kwargs['colormap']
-                kwargs.pop('colormap', None)
-            else:
-                # if cmap is not valid for plot func, try and use it anyways
-                self.colormap = kwargs['colormap']
-                kwargs.pop('colormap', None)
-                plt.set_cmap(self.colormap)
-
-        # reconstruct manually added x-y-z-sliders:
-        if 'cut_coords' in inspect.getargspec(self.plotting_func)[0] \
-                and 'x' in kwargs.keys():
-
-            # add the x-y-z as cut_coords
-            if 'display_mode' not in kwargs.keys() \
-                    or not any([label in kwargs['display_mode']
-                                for label in ['x', 'y', 'z']]):
-                # If no xyz combination of displaymodes was requested:
-                kwargs['cut_coords'] = [kwargs[label]
-                                        for label in ['x', 'y', 'z']]
-            else:
-                kwargs['cut_coords'] = [kwargs[label]
-                                        for label in ['x', 'y', 'z']
-                                        if label in kwargs['display_mode']]
-            # remove x-y-z from kwargs
-            [kwargs.pop(label, None) for label in ['x', 'y', 'z']]
-        # Actually plot the image
-        self.plotting_func(data, **kwargs)
-        plt.show()
-
-    def custom_plotter(self, plotting_func, **kwargs):
-        """
-        collects data and starts interactive widget for custom plot
+        Collects data and starts interactive widget for custom plot
         """
 
         self.plotting_func = plotting_func
         self.data = nib.load(self.filename)
-
-        # Colormap options for most plots:
-        if 'colormap' not in kwargs.keys():
-            kwargs['colormap'] = ['viridis'] + \
-                sorted(m for m in plt.cm.datad if not m.endswith("_r"))
-        elif len([kwargs['colormap']]) == 1:
-            # fix cmap if only one given
-            kwargs['colormap'] = fixed(kwargs['colormap'])
 
         # XYZ Sliders for most plots that support it:
         if 'cut_coords' in inspect.getargspec(self.plotting_func)[0] \
@@ -165,11 +160,61 @@ class NiWidget:
         # Create the widget:
         interact(self._custom_plot_wrapper, data=fixed(self.data), **kwargs)
 
-    def nifti_plotter(self, plotting_func=None, **kwargs):
+
+    def _custom_plot_wrapper(self, data, **kwargs):
         """
-        main function to be called from outside
+        Plot wrapper for custom function
         """
-        if plotting_func is None:
-            self.default_plotter(**kwargs)
-        else:
-            self.custom_plotter(plotting_func, **kwargs)
+
+        # The following should provide a colormap option to most plots:
+        if 'colormap' in kwargs.keys():
+            if 'cmap' in inspect.getargspec(self.plotting_func)[0]:
+                # if cmap is valid argument to plot func, rename but keep
+                kwargs['cmap'] = kwargs['colormap']
+                kwargs.pop('colormap', None)
+            else:
+                # if cmap is not valid for plot func, try and use it anyways
+                self.colormap = kwargs['colormap']
+                kwargs.pop('colormap', None)
+                plt.set_cmap(self.colormap)
+
+        # reconstruct manually added x-y-z-sliders:
+        if ('cut_coords' in inspect.getargspec(self.plotting_func)[0]
+            and 'x' in kwargs.keys()):
+
+            # add the x-y-z as cut_coords
+            if ('display_mode' not in kwargs.keys()
+                or not any([label in kwargs['display_mode']
+                            for label in ['x', 'y', 'z']])):
+                # If no xyz combination of display modes was requested:
+                kwargs['cut_coords'] = [kwargs[label]
+                                        for label in ['x', 'y', 'z']]
+            else:
+                kwargs['cut_coords'] = [kwargs[label]
+                                        for label in ['x', 'y', 'z']
+                                        if label in kwargs['display_mode']]
+            # remove x-y-z from kwargs
+            [kwargs.pop(label, None) for label in ['x', 'y', 'z']]
+
+        # Actually plot the image
+        self.plotting_func(data, **kwargs)
+        plt.show()
+
+
+    def surface_projection(self, pycortexid, pycortexxfm):
+        """
+        Creates interactive pycortex plots using ipywidgets.
+
+        Input: the subject ID for a subject already in your pycortex database.
+        """
+        # import pycortex in case it's not imported yet
+        import cortex
+
+        # check if the subject is in the pycortex database
+        if not pycortexid in dir(cortex.db):
+            raise IOError('Subject {} not in pycortex db.'.format(pycortexid))
+
+        self.pycortexid = pycortexid
+
+        # Surface projections in pycortex are done via "transforms", which are
+        # stored in its database.
