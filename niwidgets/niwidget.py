@@ -11,6 +11,12 @@ import scipy.ndimage
 class NiftiWidget:
     """
     Turns .nii files into interactive plots using ipywidgets.
+
+    Args
+    ----
+        filename : str
+                The path to your ``.nii`` file. Can be a string, or a
+                ``PosixPath`` from python3's pathlib.
     """
 
     def __init__(self, filename):
