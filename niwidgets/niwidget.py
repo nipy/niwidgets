@@ -38,7 +38,8 @@ class NiWidget:
             axes[subplot].set_facecolor('black')
             axes[subplot].set_title(views[subplot])
             axes[subplot].tick_params(
-                axis='both', which='both', bottom='off', top='off', labelbottom='off', right='off', left='off', labelleft='off'
+                axis='both', which='both', bottom='off', top='off',
+                labelbottom='off', right='off', left='off', labelleft='off'
                 )
             # fix the axis limits
             axis_limits = [limit for i, limit in enumerate(data.shape)
