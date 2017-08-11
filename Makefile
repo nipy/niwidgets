@@ -4,9 +4,9 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = ssvepy
+SPHINXPROJ    = niwidgets
 SOURCEDIR     = ./doc
-GH_PAGES_SOURCES = Makefile doc ssvepy
+GH_PAGES_SOURCES = Makefile doc niwidgets
 BUILDDIR      = doc/_build
 # BUILDDIR      = ..
 
