@@ -12,7 +12,7 @@ Make your neuroimaging plots interactive.
    :caption: Contents:
 
    installation
-   visualisation_wrapper.ipynb
+   examples.ipynb
    api
 
 
