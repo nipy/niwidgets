@@ -3,5 +3,5 @@ scipy
 matplotlib
 nibabel
 ipywidgets
-nilearn
 scikit-learn
+nilearn
