@@ -32,7 +32,7 @@ class NiftiWidget:
         self.filename = filename
 
 
-    def nifti_plotter(self, plotting_func=None, colormap=None, figsize=(10, 15),
+    def nifti_plotter(self, plotting_func=None, colormap=None, figsize=(15, 5),
                       **kwargs):
         """
         This is the main method for this widget.
@@ -131,10 +131,13 @@ class NiftiWidget:
             axes[subplot].set_xlim(0, axis_limits[0])
             axes[subplot].set_ylim(0, axis_limits[1])
             # plot the actual slice
-            plt.imshow(np.rot90(data[slice_obj], k=3), cmap=colormap)
+            if subplot == 0:
+                plt.imshow(np.flipud(np.rot90(data[slice_obj], k=1)),
+                           cmap=colormap)
+            else:
+                plt.imshow(np.rot90(data[slice_obj], k=3), cmap=colormap)
             # draw guides to show where the other two slices are
-            guide_positions = [data.shape[i] - val if i == 1 else val
-                               for i, val in enumerate(coords)
+            guide_positions = [val for i, val in enumerate(coords)
                                if i != subplot]
             plt.axvline(x=guide_positions[0], color='gray', alpha=0.8)
             plt.axhline(y=guide_positions[1], color='gray', alpha=0.8)
@@ -142,7 +145,9 @@ class NiftiWidget:
         # show the plot
         plt.show()
         # print the value at that point in case people need to know
-        print(f'Value at point {x}, {y}, {z}: {data[x, y, z]}')
+        print('Value at point {x}, {y}, {z}: {intensity}'.format(
+            x=x, y=y, z=z, intensity=data[x, y , z]
+        ))
 
 
     def _custom_plotter(self, plotting_func, **kwargs):
@@ -153,12 +158,10 @@ class NiftiWidget:
         self.plotting_func = plotting_func
         self.data = nib.load(self.filename)
 
-        # XYZ Sliders for most plots that support it:
-        if 'cut_coords' in inspect.getargspec(self.plotting_func)[0] \
-                and 'cut_coords' not in kwargs.keys():
-            # If no cut_coords provided but function supports it, add sliders:
-            # These will be removed inside the wrapper
-            for dim, label in enumerate(['x', 'y', 'z']):
+        # XYZ Sliders if plot supports it and user didn't provide any:
+        if ('cut_coords' in inspect.getargspec(self.plotting_func)[0]
+            and 'cut_coords' not in kwargs.keys()):
+            for label in ['x', 'y', 'z']:
                 if label not in kwargs.keys():
                     # cut_coords should be given in MNI coordinates
                     kwargs[label] = (-90, 90)
@@ -172,17 +175,17 @@ class NiftiWidget:
         Plot wrapper for custom function
         """
 
+        # start the figure
+        fig = plt.figure(figsize=kwargs.pop('figsize', None))
+
         # The following should provide a colormap option to most plots:
         if 'colormap' in kwargs.keys():
             if 'cmap' in inspect.getargspec(self.plotting_func)[0]:
-                # if cmap is valid argument to plot func, rename but keep
-                kwargs['cmap'] = kwargs['colormap']
-                kwargs.pop('colormap', None)
+                # if cmap is valid argument to plot func, rename colormap
+                kwargs['cmap'] = kwargs.pop('colormap')
             else:
-                # if cmap is not valid for plot func, try and use it anyways
-                self.colormap = kwargs['colormap']
-                kwargs.pop('colormap', None)
-                plt.set_cmap(self.colormap)
+                # if cmap is not valid for plot func, try and coerce it
+                plt.set_cmap(kwargs.pop('colormap'))
 
         # reconstruct manually added x-y-z-sliders:
         if ('cut_coords' in inspect.getargspec(self.plotting_func)[0]
@@ -203,7 +206,7 @@ class NiftiWidget:
             [kwargs.pop(label, None) for label in ['x', 'y', 'z']]
 
         # Actually plot the image
-        self.plotting_func(data, **kwargs)
+        self.plotting_func(data, figure=fig, **kwargs)
         plt.show()
 
 
