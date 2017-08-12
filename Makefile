@@ -22,6 +22,7 @@ help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 gh-pages:
+			cp doc/examples.ipynb ./index.ipynb
 			git checkout gh-pages
 			rm -rf *
 			git checkout master $(GH_PAGES_SOURCES)
