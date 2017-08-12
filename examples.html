@@ -299,13 +299,27 @@ div.nboutput div.output_area.stderr {
 
 .ansi-bold { font-weight: bold; }
 </style>
-<div class="section" id="niwidgets-examples">
-<h1><code class="docutils literal"><span class="pre">niwidgets</span></code> examples<a class="headerlink" href="#niwidgets-examples" title="Permalink to this headline">¶</a></h1>
-<p>The main class for volume images is <code class="docutils literal"><span class="pre">NiftiWidget</span></code>. It takes a path to
-a <code class="docutils literal"><span class="pre">.nii</span></code> file as input.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># NOTE: This is only to get this notebook running in binder</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="niwidgets-examples">
+<h1><code class="docutils literal"><span class="pre">niwidgets</span></code> examples<a class="headerlink" href="#niwidgets-examples" title="Permalink to this headline">¶</a></h1>
+<p>An online interactive version of this notebook can be found at:
+<a class="reference external" href="http://beta.mybinder.org/repo/janfreyberg/niwidgets">beta.mybinder.org/repo/janfreyberg/niwidgets</a></p>
+<p>The main (and only, for now) class for volume images is <code class="docutils literal"><span class="pre">NiftiWidget</span></code>.
+It takes a path to a <code class="docutils literal"><span class="pre">.nii</span></code> file as input.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -321,7 +335,7 @@ import one of the example files that ships with <code class="docutils literal"><
 weighted structural scan.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [2]:
+<span></span>In [3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -337,7 +351,7 @@ weighted structural scan.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9abd44fe4e4241a58954a1e886b0760b"}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "33d16757290a4a7b9aef670436ab60bf"}</script></div>
 </div>
 </div>
 <div class="section" id="Use-plotting-functions-from-nilearn">
@@ -352,7 +366,7 @@ defaults are used).</p>
 we get this:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [3]:
+<span></span>In [4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -367,7 +381,7 @@ we get this:</p>
 </div>
 <div class="stderr output_area docutils container">
 <div class="highlight"><pre>
-/Library/anaconda/envs/py36/lib/python3.6/site-packages/sklearn/cross_validation.py:44: DeprecationWarning: This module was deprecated in version 0.18 in favor of the model_selection module into which all the refactored classes and functions are moved. Also note that the interface of the new CV iterators are different from that of this module. This module will be removed in 0.20.
+/Library/anaconda/envs/py36/lib/python3.6/site-packages/sklearn/cross_validation.py:41: DeprecationWarning: This module was deprecated in version 0.18 in favor of the model_selection module into which all the refactored classes and functions are moved. Also note that the interface of the new CV iterators are different from that of this module. This module will be removed in 0.20.
   &#34;This module will be removed in 0.20.&#34;, DeprecationWarning)
 </pre></div></div>
 </div>
@@ -375,7 +389,7 @@ we get this:</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "485c62b2cf014805960f7c7d5edf3fc2"}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "02cfef3d3aa64ebd83069910f31e56dd"}</script></div>
 </div>
 </div>
 <div class="section" id="plot_glass_brain">
@@ -385,7 +399,7 @@ perception activation map from neurosynth (this also ships as an example
 with <code class="docutils literal"><span class="pre">niwidgets</span></code>:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [4]:
+<span></span>In [5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -400,7 +414,7 @@ with <code class="docutils literal"><span class="pre">niwidgets</span></code>:</
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6c8f6df2d1a14faba05d96cf9df5efc1"}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "61184c4cc9fb4006b78a4f746d22d748"}</script></div>
 </div>
 </div>
 <div class="section" id="plot_img">
@@ -409,7 +423,7 @@ with <code class="docutils literal"><span class="pre">niwidgets</span></code>:</
 an example atlas (the CC400 atlas), and setting the colormap:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [5]:
+<span></span>In [6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -420,7 +434,7 @@ an example atlas (the CC400 atlas), and setting the colormap:</p>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [6]:
+<span></span>In [7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -434,9 +448,11 @@ an example atlas (the CC400 atlas), and setting the colormap:</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "eb890611579a4c4385b5b103acff5dbc"}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ac0292303010446d8b75fb9cbde00a8c"}</script></div>
 </div>
-</div>
+<script type="application/vnd.jupyter.widget-state+json">
+{"state": {"02cfef3d3aa64ebd83069910f31e56dd": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "VBoxModel", "state": {"_dom_classes": ["widget-interact"], "_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "children": ["IPY_MODEL_2ff146df5b3541a1942b9a533ac01fc6", "IPY_MODEL_10153bb0646b47ddbc61a02a80666173", "IPY_MODEL_3bfdd08ea5534b80a49d80d384318713", "IPY_MODEL_f2d19ac4ef8a4c96aabce1aebee94a6b", "IPY_MODEL_5fe6fdd87f7146afa8f1416f0eb99833", "IPY_MODEL_513e0f1a5f564eb7805a65ca016630f3"], "layout": "IPY_MODEL_1b66ed2b8a504e09aca2487184216762"}}, "02e7043bfe304eb5b700eb23eeed9737": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "OutputModel", "state": {"_dom_classes": [], "_model_module": "jupyter-js-widgets", "_model_module_version": "~2.1.4", "_view_module": "jupyter-js-widgets", "_view_module_version": "~2.1.4", "layout": "IPY_MODEL_5ed383c1b1de4845a59e35b0e5e8da08", "msg_throttle": 1}}, "0304a171de3f4745b186a5a40b9fbed2": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "DropdownModel", "state": {"_model_module_version": "~2.1.4", "_options_labels": ["ortho", "x", "y", "z"], "_view_module_version": "~2.1.4", "description": "display_mode", "layout": "IPY_MODEL_cfe06c029dd8411d901bb1ac753019ae", "value": "ortho"}}, "0b88d0ff409d4a328846826ef2d02342": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "10153bb0646b47ddbc61a02a80666173": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "DropdownModel", "state": {"_model_module_version": "~2.1.4", "_options_labels": ["viridis", "Accent", "Blues", "BrBG", "BuGn", "BuPu", "CMRmap", "Dark2", "GnBu", "Greens", "Greys", "OrRd", "Oranges", "PRGn", "Paired", "Pastel1", "Pastel2", "PiYG", "PuBu", "PuBuGn", "PuOr", "PuRd", "Purples", "RdBu", "RdGy", "RdPu", "RdYlBu", "RdYlGn", "Reds", "Set1", "Set2", "Set3", "Spectral", "Vega10", "Vega20", "Vega20b", "Vega20c", "Wistia", "YlGn", "YlGnBu", "YlOrBr", "YlOrRd", "afmhot", "autumn", "binary", "bone", "brg", "bwr", "cool", "coolwarm", "copper", "cubehelix", "flag", "gist_earth", "gist_gray", "gist_heat", "gist_ncar", "gist_rainbow", "gist_stern", "gist_yarg", "gnuplot", "gnuplot2", "gray", "hot", "hsv", "jet", "nipy_spectral", "ocean", "pink", "prism", "rainbow", "seismic", "spectral", "spring", "summer", "tab10", "tab20", "tab20b", "tab20c", "terrain", "winter"], "_view_module_version": "~2.1.4", "description": "colormap", "layout": "IPY_MODEL_a726422c3ce945cf98d70c723d39723d", "value": "viridis"}}, "1b66ed2b8a504e09aca2487184216762": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "249b399be5a142b6bc9ca60ea1c6bbf4": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "259389a295f2485ba1d4278f475ea3d1": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "OutputModel", "state": {"_dom_classes": [], "_model_module": "jupyter-js-widgets", "_model_module_version": "~2.1.4", "_view_module": "jupyter-js-widgets", "_view_module_version": "~2.1.4", "layout": "IPY_MODEL_43ce69fd2e464765b8c91e77f7fc7541", "msg_throttle": 1}}, "2b58903236944b9d9dee736fd7ca7054": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "SliderStyleModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "2ceb211687464ca6a1a386f1dbde6993": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "2d8550efc56541f293c64380315c5d25": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "IntSliderModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "description": "z", "layout": "IPY_MODEL_2ceb211687464ca6a1a386f1dbde6993", "max": 90, "min": -90, "style": "IPY_MODEL_c20781c446b344fd997f32c1bed0fb87"}}, "2ff146df5b3541a1942b9a533ac01fc6": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "DropdownModel", "state": {"_model_module_version": "~2.1.4", "_options_labels": ["ortho", "x", "y", "z", "yx", "xz", "yz"], "_view_module_version": "~2.1.4", "description": "display_mode", "layout": "IPY_MODEL_0b88d0ff409d4a328846826ef2d02342", "value": "ortho"}}, "33d16757290a4a7b9aef670436ab60bf": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "VBoxModel", "state": {"_dom_classes": ["widget-interact"], "_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "children": ["IPY_MODEL_804478b35a5e4da1967954cbceaed7c6", "IPY_MODEL_8343eca5b935444db99fa69d30f4794b", "IPY_MODEL_8ef0b7116f8d417b87c55156c0cde7f8", "IPY_MODEL_faf54a593b0440fdbcecc75065a66e9d", "IPY_MODEL_259389a295f2485ba1d4278f475ea3d1"], "layout": "IPY_MODEL_c7923460aeb54b66bf5c85c402c0f20a"}}, "3bfdd08ea5534b80a49d80d384318713": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "IntSliderModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "description": "x", "layout": "IPY_MODEL_574966a3e9384404a88c2fa447b62ba1", "max": 90, "min": -90, "style": "IPY_MODEL_4823b75873e9483ca283e54442669a69"}}, "3eac70584cff4df9a37a747d6e270354": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "3ee911fb704a4d2a9e208b9ba35f455c": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "41281d4d2b8d410ebe13d0d70f1cc07e": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "43ce69fd2e464765b8c91e77f7fc7541": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "4823b75873e9483ca283e54442669a69": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "SliderStyleModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "4cc06fe87371409398cffb48b46a94dc": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "513e0f1a5f564eb7805a65ca016630f3": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "OutputModel", "state": {"_dom_classes": [], "_model_module": "jupyter-js-widgets", "_model_module_version": "~2.1.4", "_view_module": "jupyter-js-widgets", "_view_module_version": "~2.1.4", "layout": "IPY_MODEL_4cc06fe87371409398cffb48b46a94dc", "msg_throttle": 1}}, "52321e14a63c404f9f2c18940dd475d5": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "574966a3e9384404a88c2fa447b62ba1": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "5ed383c1b1de4845a59e35b0e5e8da08": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "5fe6fdd87f7146afa8f1416f0eb99833": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "IntSliderModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "description": "z", "layout": "IPY_MODEL_3ee911fb704a4d2a9e208b9ba35f455c", "max": 90, "min": -90, "style": "IPY_MODEL_cedc24b3496c477490135f9fbee6878a"}}, "61184c4cc9fb4006b78a4f746d22d748": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "VBoxModel", "state": {"_dom_classes": ["widget-interact"], "_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "children": ["IPY_MODEL_6ee5fc3048ee48a2a36763a8dd7cceba", "IPY_MODEL_8952750b750547819c986d14f4259047", "IPY_MODEL_6df3d90709904ec7990df7ae4cfa0346"], "layout": "IPY_MODEL_3eac70584cff4df9a37a747d6e270354"}}, "663943d3b9334f65851da55856fb0f4f": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "6924ab938f6940beb2d8267946741334": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "6df3d90709904ec7990df7ae4cfa0346": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "OutputModel", "state": {"_dom_classes": [], "_model_module": "jupyter-js-widgets", "_model_module_version": "~2.1.4", "_view_module": "jupyter-js-widgets", "_view_module_version": "~2.1.4", "layout": "IPY_MODEL_b384268139a54840866a43974b6fd560", "msg_throttle": 1}}, "6ee5fc3048ee48a2a36763a8dd7cceba": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "FloatSliderModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "description": "threshold", "layout": "IPY_MODEL_41281d4d2b8d410ebe13d0d70f1cc07e", "max": 10, "step": 0.01, "value": 5}}, "804478b35a5e4da1967954cbceaed7c6": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "IntSliderModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "description": "x", "layout": "IPY_MODEL_249b399be5a142b6bc9ca60ea1c6bbf4", "max": 90, "style": "IPY_MODEL_cc7b1e35846c4ca0a4503f572e121a66", "value": 45}}, "82a29bfddda2482eb744404c77357e61": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "8343eca5b935444db99fa69d30f4794b": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "IntSliderModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "description": "y", "layout": "IPY_MODEL_903927396cf1427384c4ee43a2cfc47f", "max": 108, "style": "IPY_MODEL_bfebc1dc1e8c45f58819d0162f4702b6", "value": 54}}, "868a6c2331a14c249d93779a571d2be4": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "SliderStyleModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "8952750b750547819c986d14f4259047": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "DropdownModel", "state": {"_model_module_version": "~2.1.4", "_options_labels": ["ortho", "xz"], "_view_module_version": "~2.1.4", "description": "display_mode", "layout": "IPY_MODEL_663943d3b9334f65851da55856fb0f4f", "value": "ortho"}}, "8ef0b7116f8d417b87c55156c0cde7f8": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "IntSliderModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "description": "z", "layout": "IPY_MODEL_f9f528c79383412cb38dd50e0b93e753", "max": 90, "style": "IPY_MODEL_2b58903236944b9d9dee736fd7ca7054", "value": 29}}, "903927396cf1427384c4ee43a2cfc47f": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "a726422c3ce945cf98d70c723d39723d": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "ab2c6396299e4db3910d33b843db1766": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "SliderStyleModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "ac0292303010446d8b75fb9cbde00a8c": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "VBoxModel", "state": {"_dom_classes": ["widget-interact"], "_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "children": ["IPY_MODEL_0304a171de3f4745b186a5a40b9fbed2", "IPY_MODEL_f474a0f653c547e597244bc4a739f954", "IPY_MODEL_ef59acb85038412190ed99caa5b464b6", "IPY_MODEL_2d8550efc56541f293c64380315c5d25", "IPY_MODEL_02e7043bfe304eb5b700eb23eeed9737"], "layout": "IPY_MODEL_52321e14a63c404f9f2c18940dd475d5"}}, "b384268139a54840866a43974b6fd560": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "bfebc1dc1e8c45f58819d0162f4702b6": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "SliderStyleModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "c20781c446b344fd997f32c1bed0fb87": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "SliderStyleModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "c7923460aeb54b66bf5c85c402c0f20a": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "cc1d818761544786a3f1ce0f2773a3a2": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "cc7b1e35846c4ca0a4503f572e121a66": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "SliderStyleModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "cedc24b3496c477490135f9fbee6878a": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "SliderStyleModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "cfe06c029dd8411d901bb1ac753019ae": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "eafa82aca1eb490f8cc373484e5d7612": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "SliderStyleModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "ef59acb85038412190ed99caa5b464b6": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "IntSliderModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "description": "y", "layout": "IPY_MODEL_cc1d818761544786a3f1ce0f2773a3a2", "max": 90, "min": -90, "style": "IPY_MODEL_868a6c2331a14c249d93779a571d2be4"}}, "f2d19ac4ef8a4c96aabce1aebee94a6b": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "IntSliderModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "description": "y", "layout": "IPY_MODEL_82a29bfddda2482eb744404c77357e61", "max": 90, "min": -90, "style": "IPY_MODEL_eafa82aca1eb490f8cc373484e5d7612"}}, "f30be0b2b9a84ec9acbb1f15ea81e76f": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "f474a0f653c547e597244bc4a739f954": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "IntSliderModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4", "description": "x", "layout": "IPY_MODEL_f30be0b2b9a84ec9acbb1f15ea81e76f", "max": 90, "min": -90, "style": "IPY_MODEL_ab2c6396299e4db3910d33b843db1766"}}, "f9f528c79383412cb38dd50e0b93e753": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "LayoutModel", "state": {"_model_module_version": "~2.1.4", "_view_module_version": "~2.1.4"}}, "faf54a593b0440fdbcecc75065a66e9d": {"model_module": "jupyter-js-widgets", "model_module_version": "~2.1.4", "model_name": "DropdownModel", "state": {"_model_module_version": "~2.1.4", "_options_labels": ["viridis", "Accent", "Blues", "BrBG", "BuGn", "BuPu", "CMRmap", "Dark2", "GnBu", "Greens", "Greys", "OrRd", "Oranges", "PRGn", "Paired", "Pastel1", "Pastel2", "PiYG", "PuBu", "PuBuGn", "PuOr", "PuRd", "Purples", "RdBu", "RdGy", "RdPu", "RdYlBu", "RdYlGn", "Reds", "Set1", "Set2", "Set3", "Spectral", "Vega10", "Vega20", "Vega20b", "Vega20c", "Wistia", "YlGn", "YlGnBu", "YlOrBr", "YlOrRd", "afmhot", "autumn", "binary", "bone", "brg", "bwr", "cool", "coolwarm", "copper", "cubehelix", "flag", "gist_earth", "gist_gray", "gist_heat", "gist_ncar", "gist_rainbow", "gist_stern", "gist_yarg", "gnuplot", "gnuplot2", "gray", "hot", "hsv", "jet", "nipy_spectral", "ocean", "pink", "prism", "rainbow", "seismic", "spectral", "spring", "summer", "tab10", "tab20", "tab20b", "tab20c", "terrain", "winter"], "_view_module_version": "~2.1.4", "description": "colormap", "layout": "IPY_MODEL_6924ab938f6940beb2d8267946741334", "value": "viridis"}}}, "version_major": 1, "version_minor": 0}
+</script></div>
 </div>
 </div>
 
