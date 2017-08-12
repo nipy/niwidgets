@@ -6,7 +6,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = niwidgets
 SOURCEDIR     = ./doc
-GH_PAGES_SOURCES = Makefile doc niwidgets
+GH_PAGES_SOURCES = Makefile doc niwidgets index.ipynb
 BUILDDIR      = doc/_build
 # BUILDDIR      = ..
 
@@ -22,11 +22,11 @@ help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 gh-pages:
-			cp doc/examples.ipynb ./index.ipynb
 			git checkout gh-pages
 			rm -rf *
 			git checkout master $(GH_PAGES_SOURCES)
 			git reset HEAD
+			cp ./index.ipynb doc/examples.ipynb
 			make html
 			mv -fv $(BUILDDIR)/html/* ./
 			rm -rf $(SOURCEDIR) build
