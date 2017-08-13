@@ -19,12 +19,3 @@ Make your neuroimaging plots interactive.
    installation.rst
    examples.ipynb
    api
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
