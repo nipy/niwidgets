@@ -1,7 +1,9 @@
 # Neuroimaging Widgets (`niwidgets`)
 _By [Jan Freyberg](http://www.twitter.com/janfreyberg) and [Bjoern Soergel](http://www.ast.cam.ac.uk/~bs538/)_
 
-This repository is supposed to provide easy and general wrappers to display interactive widgets that visualise standard-format neuroimaging data, using new functions and standard functions from other libraries.
+This repository is supposed to provide easy and general wrappers to display interactive widgets that visualise standard-format neuroimaging data, using new functions and standard functions from other libraries. It looks like this:
+
+![](https://thumbs.gfycat.com/ExcitableReflectingLcont-size_restricted.gif)
 
 Install via:
 ```
@@ -26,8 +28,8 @@ https://github.com/janfreyberg/niwidgets/blob/master/visualisation_wrapper.ipynb
 So far, the widgets support plotting of nifti files, either in `nii` or `nii.gz` format. You initialise a widget class like this:
 
 ```
-from niwidgets import NiWidget
-my_widget = NiWidget('./path/to/file.nii')
+from niwidgets import NiftiWidget
+my_widget = NiftiWidget('./path/to/file.nii')
 ```
 
 You can then create a plot either with our default nifti plotter:
