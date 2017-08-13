@@ -1,7 +1,9 @@
 # Neuroimaging Widgets (`niwidgets`)
 _By [Jan Freyberg](http://www.twitter.com/janfreyberg) and [Bjoern Soergel](http://www.ast.cam.ac.uk/~bs538/)_
 
-This repository is supposed to provide easy and general wrappers to display interactive widgets that visualise standard-format neuroimaging data, using new functions and standard functions from other libraries.
+This repository is supposed to provide easy and general wrappers to display interactive widgets that visualise standard-format neuroimaging data, using new functions and standard functions from other libraries. It looks like this:
+
+![](https://thumbs.gfycat.com/ExcitableReflectingLcont-size_restricted.gif)
 
 Install via:
 ```
