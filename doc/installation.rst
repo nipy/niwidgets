@@ -1,3 +1,9 @@
+Installation
+============
+
+Install via ``pip``
+-------------------
+
 Install via:
 
 ``pip install niwidgets``
@@ -9,5 +15,8 @@ Or via:
 It requires nibabel and nilearn:
 
 ``pip install nibabel nilearn``
+
+Development installation
+------------------------
 
 As always with pip packages, you can install a "development" version of this package by cloning the git repository and installing it via ``pip install -e /path/to/package``.
