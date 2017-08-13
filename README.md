@@ -28,8 +28,8 @@ https://github.com/janfreyberg/niwidgets/blob/master/visualisation_wrapper.ipynb
 So far, the widgets support plotting of nifti files, either in `nii` or `nii.gz` format. You initialise a widget class like this:
 
 ```
-from niwidgets import NiWidget
-my_widget = NiWidget('./path/to/file.nii')
+from niwidgets import NiftiWidget
+my_widget = NiftiWidget('./path/to/file.nii')
 ```
 
 You can then create a plot either with our default nifti plotter:
