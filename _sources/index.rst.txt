@@ -13,7 +13,7 @@ Make your neuroimaging plots interactive.
    :maxdepth: 3
    :caption: Documentation content:
 
-   installation
+   installation.rst
    examples.ipynb
    api
 
