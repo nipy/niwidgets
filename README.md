@@ -5,6 +5,10 @@ This repository is supposed to provide easy and general wrappers to display inte
 
 Install via:
 ```
+pip install niwidgets
+```
+Or, to get the most up-to-date version from github:
+```
 pip install git+git://github.com/janfreyberg/niwidgets/
 ```
 
