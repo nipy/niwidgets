@@ -12,6 +12,12 @@ Make your neuroimaging plots interactive.
 
 |
 
+``niwidgets`` was developed and is maintained by `Bjoern Soergel <http://www.ast.cam.ac.uk/~bs538/index.html>`_ and `Jan Freyberg <http://www.janfreyberg.com/>`_.
+
+We welcome contributions of any kind - feature suggestions, feature additions or bug reports should all be done at http://www.github.com/janfreyberg/niwidgets.
+
+|
+
 .. toctree::
    :maxdepth: 3
    :caption: Documentation content:
