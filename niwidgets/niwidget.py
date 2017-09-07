@@ -30,7 +30,7 @@ class NiftiWidget:
         # that nibabel can read
 
         self.filename = filename
-
+        self.image_handles = None
 
     def nifti_plotter(self, plotting_func=None, colormap=None, figsize=(15, 5),
                       **kwargs):
@@ -105,6 +105,34 @@ class NiftiWidget:
 
         interact(self._plot_slices, data=fixed(self.data), **kwargs)
 
+    # DUPLICATE to delete
+    def _init_figure(self, datashape, colormap, figsize):
+        # put chunk below in _init_figure
+
+        fig, axes = plt.subplots(1, 3, figsize=figsize)
+
+        for ii, ax in enumerate(axes):
+
+            ax.set_facecolor('black')
+
+            ax.tick_params(
+                axis='both', which='both', bottom='off', top='off',
+                labelbottom='off', right='off', left='off', labelleft='off'
+                )
+            # fix the axis limits
+            axis_limits = [limit for jj, limit in enumerate(datashape)
+                           if jj != ii]
+            ax.set_xlim(0, axis_limits[0])
+            ax.set_ylim(0, axis_limits[1])
+
+            im = ax.imshow(np.zeros(axis_limits[::-1]), cmap=colormap)
+
+            ax.axvline(x=0, color='gray', alpha=0.8)
+            ax.axhline(y=0, color='gray', alpha=0.8)
+
+            self.image_handles.append(im)
+        plt.show()
+
 
     def _plot_slices(self, data, x, y, z, colormap='viridis', figsize=(15, 5)):
         """
@@ -112,35 +140,30 @@ class NiftiWidget:
 
         This function is called by
         """
+        if self.image_handles is None:
+            self.image_handles = []
+            self._init_figure(data.shape, colormap, figsize)
+
         coords = [x, y, z]
         views = ['Sagittal', 'Coronal', 'Axial']
-        fig, axes = plt.subplots(1, 3, figsize=figsize)
-        for subplot in range(3):
+
+
+        for ii, imh in enumerate(self.image_handles):
             slice_obj = 3 * [slice(None)]
-            slice_obj[subplot] = coords[subplot]
-            plt.sca(axes[subplot])
-            axes[subplot].set_facecolor('black')
-            axes[subplot].set_title(views[subplot])
-            axes[subplot].tick_params(
-                axis='both', which='both', bottom='off', top='off',
-                labelbottom='off', right='off', left='off', labelleft='off'
-                )
-            # fix the axis limits
-            axis_limits = [limit for i, limit in enumerate(data.shape)
-                           if i != subplot]
-            axes[subplot].set_xlim(0, axis_limits[0])
-            axes[subplot].set_ylim(0, axis_limits[1])
+            slice_obj[ii] = coords[ii]
+
             # plot the actual slice
-            if subplot == 0:
-                plt.imshow(np.flipud(np.rot90(data[slice_obj], k=1)),
-                           cmap=colormap)
+            if ii == 0:
+                imh.set_data(np.flipud(np.rot90(data[slice_obj], k=1)))
+                # use object-oriented figure update
+                # axes[subplot].imshow
             else:
-                plt.imshow(np.rot90(data[slice_obj], k=3), cmap=colormap)
+                imh.set_data(np.flipud(np.rot90(data[slice_obj], k=3)))
             # draw guides to show where the other two slices are
-            guide_positions = [val for i, val in enumerate(coords)
-                               if i != subplot]
-            plt.axvline(x=guide_positions[0], color='gray', alpha=0.8)
-            plt.axhline(y=guide_positions[1], color='gray', alpha=0.8)
+            guide_positions = [val for jj, val in enumerate(coords)
+                               if jj != ii]
+            imh.axes.lines[0].set_xdata(2*[guide_positions[0]])
+            imh.axes.lines[1].set_ydata(2*[guide_positions[1]])
 
         # show the plot
         plt.show()
