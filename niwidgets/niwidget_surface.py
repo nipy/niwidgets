@@ -2,23 +2,39 @@ from __future__ import print_function
 import nibabel as nb
 import matplotlib.pyplot as plt
 import numpy as np
-from ipywidgets import interact, fixed, IntSlider
+from ipywidgets import interact, interactive, fixed, IntSlider
 from ipyvolume import gcf
 import ipyvolume.pylab as p3
 import ipyvolume.widgets as ipv
 import os
-import inspect
-import scipy.ndimage
-
 
 class SurfaceWidget:
     def __init__(self, meshfile, overlayfiles):
+        '''
+            Create a surface widget
+
+            meshfile: file containing the
+                      (1) 3D coordinates of each vertex (V x 3 array, where V=#vertices)
+                      (2) triangle specifications (T x 3 array, where T=#triangles)
+                      Can be a FreeSurfer (i.e., lh.pial) or .gii mesh file
+            overlayfiles: overlay file containing the scalar value at each vertex (V x 1)
+                          Can be a FreeSurfer .annot, .thickness, .curv, .sulc; or .gii
+        '''
         self.meshfile = meshfile
         self.overlayfiles = overlayfiles
         #self.meshes = None
         self.fig = None
 
     def _init_figure(self, x, y, z, triangles, figsize, figlims):
+        '''
+            Initialize the figure by plotting the surface without any overlay.
+            x: x coordinates of vertices (V x 1 numpy array)
+            y: y coordinates of vertices (V x 1 numpy array)
+            z: z coordinates of vertices (V x 1 numpy array)
+            triangles: triangle specifications (T x 3 numpy array, where T=#triangles)
+            figsize: 2x1 list of integers
+            figlims: 3x2 list of integers
+        '''
         self.fig = p3.figure(width=figsize[0], height=figsize[1])
         self.fig.camera_fov = 1
         self.fig.style = {'axes': {'color': 'black',
@@ -31,16 +47,22 @@ class SurfaceWidget:
         self.fig.ylim = (figlims[1][0], figlims[1][1])
         self.fig.zlim = (figlims[2][0], figlims[2][1])
 
-        #p3.figure()
         # we draw the tetrahedron
         p3.plot_trisurf(x, y, z, triangles=triangles, color=np.ones((len(x),3)))
-        p3.show()
+        #p3.show()
 
     def _plot_surface(self, x, y, z, triangles,
                       overlays=None, frame=0,
                       colormap='summer',
                       figsize=np.array([600,600]),
                       figlims=np.array([[-100,100],[-100,100],[-100,100]])):
+        '''
+            Visualize/update the overlay by changing the color associated
+            with mesh vertices
+
+            overlays: V x F numpy array, where each column corresponds to a
+                      different overlay. F=#frames or #timepoints.
+        '''
         if self.fig is None:
             self._init_figure(x, y, z, triangles, figsize, figlims)
 
@@ -51,10 +73,17 @@ class SurfaceWidget:
         colors=my_color((activation-min(activation))/(max(activation)-min(activation)))
         self.fig.meshes[0].color = colors[:,:3]
 
+        #return self.fig
+
     def surface_plotter(self, colormap=None,
                         figsize=np.array([600,600]),
                         figlims=np.array([[-100,100],[-100,100],[-100,100]]),
                         **kwargs):
+        '''
+            Read mesh and overlay data
+            Setup the interactive widget
+            Set defaults for plotting
+        '''
         # set default colormap options & add them to the kwargs
         if colormap is None:
             kwargs['colormap'] = ['viridis'] + \
@@ -80,7 +109,7 @@ class SurfaceWidget:
                 except:
                     raise ValueError('Please provide a valid gifti file.')
             else:
-                fsgeometry = nb.freesurfer.read_geometry(mesh)
+                fsgeometry = nb.freesurfer.read_geometry(self.meshfile)
                 x,y,z = fsgeometry[0].T
                 vertex_edges=fsgeometry[1]
 
