@@ -3,6 +3,7 @@ import nibabel as nb
 import matplotlib.pyplot as plt
 import numpy as np
 from ipywidgets import interact, fixed, IntSlider
+from ipyvolume import gcf
 import ipyvolume.pylab as p3
 import ipyvolume.widgets as ipv
 import os
@@ -18,54 +19,29 @@ class SurfaceWidget:
         self.fig = None
 
     def _init_figure(self, x, y, z, triangles, figsize, figlims):
-        #fig = gcf()
-
-        fig = p3.figure(width=figsize[0], height=figsize[1])
-        fig.camera_fov = 1
-        fig.style = {'axes': {'color': 'black',
+        self.fig = p3.figure(width=figsize[0], height=figsize[1])
+        self.fig.camera_fov = 1
+        self.fig.style = {'axes': {'color': 'black',
                      'label': {'color': 'black'},
                      'ticklabel': {'color': 'black'},
                      'visible': False},
                      'background-color': 'white',
                      'box': {'visible': False}}
-        fig.xlim = (figlims[0][0], figlims[0][1])
-        fig.ylim = (figlims[1][0], figlims[1][1])
-        fig.zlim = (figlims[2][0], figlims[2][1])
+        self.fig.xlim = (figlims[0][0], figlims[0][1])
+        self.fig.ylim = (figlims[1][0], figlims[1][1])
+        self.fig.zlim = (figlims[2][0], figlims[2][1])
 
         #p3.figure()
         # we draw the tetrahedron
-        p3.plot_trisurf(x, y, z, triangles=triangles,
-                               color=np.ones((len(x),3)))
+        p3.plot_trisurf(x, y, z, triangles=triangles, color=np.ones((len(x),3)))
         p3.show()
-
-        self.fig = p3.gcf()
-
-        '''
-        if triangles is not None:
-            triangles = np.array(triangles).astype(dtype=np.uint32)
-
-        mesh = p3.Mesh(x=x, y=y, z=z, triangles=triangles,
-                        lines=None, color=np.ones([len(x),3]),
-                        u=u, v=v, texture=texture)
-
-        # can comment out if there are problems
-        mesh._grow_limits(np.array(x).reshape(-1), np.array(y).reshape(-1), np.array(z).reshape(-1))
-        '''
-
-        #self.meshes.append(mesh)
 
     def _plot_surface(self, x, y, z, triangles,
                       overlays=None, frame=0,
                       colormap='summer',
                       figsize=np.array([600,600]),
                       figlims=np.array([[-100,100],[-100,100],[-100,100]])):
-        '''
-        if self.meshes is None:
-            self.meshes = []
-            self._init_figure(x, y, z, triangles, figsize, figlims)
-        '''
         if self.fig is None:
-            self.fig = []
             self._init_figure(x, y, z, triangles, figsize, figlims)
 
         # overlays is a 2D matrix
@@ -73,9 +49,7 @@ class SurfaceWidget:
         my_color = plt.cm.get_cmap(colormap)
         activation = overlays[:,frame]
         colors=my_color((activation-min(activation))/(max(activation)-min(activation)))
-
         self.fig.meshes[0].color = colors[:,:3]
-        #p3.show()
 
     def surface_plotter(self, colormap=None,
                         figsize=np.array([600,600]),
@@ -117,10 +91,6 @@ class SurfaceWidget:
                 x, y, z = vertex_spatial.T
             except:
                 raise ValueError('Please provide a valid gifti file.')
-
-        print(x.shape)
-        print(y.shape)
-        print(z.shape)
 
         if isinstance(self.overlayfiles,list):
             max_frame = len(self.overlayfiles)-1
