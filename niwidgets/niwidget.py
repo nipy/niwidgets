@@ -2,7 +2,7 @@ from __future__ import print_function
 import nibabel as nib
 import matplotlib.pyplot as plt
 import numpy as np
-from ipywidgets import interact, fixed
+from ipywidgets import interact, fixed, IntSlider
 import os
 import inspect
 import scipy.ndimage
@@ -100,15 +100,18 @@ class NiftiWidget:
         # set default x y z values
         for dim, label in enumerate(['x', 'y', 'z']):
             if label not in kwargs.keys():
-                kwargs[label] = (0, self.data.shape[dim] - 1)
+                kwargs[label] = IntSlider((self.data.shape[dim] - 1)/2,
+                                          min=0, max=self.data.shape[dim] - 1, continuous_update=False)
 
         interact(self._plot_slices, data=fixed(self.data), **kwargs)
 
-    # DUPLICATE to delete
-    def _init_figure(self, datashape, colormap, figsize):
+
+    def _init_figure(self, data, colormap, figsize):
         # put chunk below in _init_figure
 
-        fig, axes = plt.subplots(1, 3, figsize=figsize)
+        self.fig, axes = plt.subplots(1, 3, figsize=figsize)
+
+        data_max = data.max()
 
         for ii, ax in enumerate(axes):
 
@@ -119,18 +122,19 @@ class NiftiWidget:
                 labelbottom='off', right='off', left='off', labelleft='off'
                 )
             # fix the axis limits
-            axis_limits = [limit for jj, limit in enumerate(datashape)
+            axis_limits = [limit for jj, limit in enumerate(data.shape)
                            if jj != ii]
             ax.set_xlim(0, axis_limits[0])
             ax.set_ylim(0, axis_limits[1])
 
-            im = ax.imshow(np.zeros(axis_limits[::-1]), cmap=colormap)
+            img = np.zeros(axis_limits[::-1])
+            img[1] = data_max
+            im = ax.imshow(img, cmap=colormap)
 
             ax.axvline(x=0, color='gray', alpha=0.8)
             ax.axhline(y=0, color='gray', alpha=0.8)
 
             self.image_handles.append(im)
-        plt.show()
 
 
     def _plot_slices(self, data, x, y, z, colormap='viridis', figsize=(15, 5)):
@@ -141,7 +145,7 @@ class NiftiWidget:
         """
         if self.image_handles is None:
             self.image_handles = []
-            self._init_figure(data.shape, colormap, figsize)
+            self._init_figure(data, colormap, figsize)
 
         coords = [x, y, z]
         views = ['Sagittal', 'Coronal', 'Axial']
@@ -165,11 +169,12 @@ class NiftiWidget:
             imh.axes.lines[1].set_ydata(2*[guide_positions[1]])
 
         # show the plot
-        plt.show()
+        # plt.show()
         # print the value at that point in case people need to know
-        print('Value at point {x}, {y}, {z}: {intensity}'.format(
-            x=x, y=y, z=z, intensity=data[x, y , z]
-        ))
+        #print('Value at point {x}, {y}, {z}: {intensity}'.format(
+        #    x=x, y=y, z=z, intensity=data[x, y , z]
+        #))
+        return self.fig
 
 
     def _custom_plotter(self, plotting_func, **kwargs):
