@@ -7,7 +7,6 @@ import os
 import inspect
 import scipy.ndimage
 
-
 class NiftiWidget:
     """
     Turns .nii files into interactive plots using ipywidgets.
