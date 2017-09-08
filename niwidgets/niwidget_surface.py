@@ -31,10 +31,12 @@ class SurfaceWidget:
         fig.ylim = (figlims[1][0], figlims[1][1])
         fig.zlim = (figlims[2][0], figlims[2][1])
 
-        #p3.figure()
+        p3.figure()
         # we draw the tetrahedron
-        #mesh = p3.plot_trisurf(x, y, z, triangles=triangles, color='orange')
+        mesh = p3.plot_trisurf(x, y, z, triangles=triangles,
+                               color=np.ones((len(x),3)))
 
+        '''
         if triangles is not None:
             triangles = np.array(triangles).astype(dtype=np.uint32)
 
@@ -44,7 +46,7 @@ class SurfaceWidget:
 
         # can comment out if there are problems
         mesh._grow_limits(np.array(x).reshape(-1), np.array(y).reshape(-1), np.array(z).reshape(-1))
-
+        '''
 
         self.meshes.append(mesh)
 
@@ -62,7 +64,9 @@ class SurfaceWidget:
         my_color = plt.cm.get_cmap(colormap)
         activation = overlays[:,frame]
         colors=my_color((activation-min(activation))/(max(activation)-min(activation)))
-        self.meshes[0].color = colors
+        print(colors)
+        self.meshes[0].color = colors[:,:3]
+        p3.show()
 
     def surface_plotter(self, colormap=None,
                         figsize=np.array([600,600]),
