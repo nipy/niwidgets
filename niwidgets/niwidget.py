@@ -168,6 +168,7 @@ class NiftiWidget:
             imh.axes.lines[0].set_xdata(2*[guide_positions[0]])
             imh.axes.lines[1].set_ydata(2*[guide_positions[1]])
 
+            imh.set_cmap(colormap)
         # show the plot
         # plt.show()
         # print the value at that point in case people need to know
