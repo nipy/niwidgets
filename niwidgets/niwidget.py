@@ -24,11 +24,10 @@ class NiftiWidget:
             # for Python3 should have FileNotFoundError here
             raise IOError('file {} not found'.format(filename))
 
-        # TODO:
-        # could also add a check here that input file is in one of the formats
-        # that nibabel can read
-
-        self.filename = filename
+        # load data in advance
+        # this ensures once the widget is created that the file is of a format
+        # readable by nibabel
+        self.data = nib.load(filename).dataobj.get_unscaled()
         self.image_handles = None
 
     def nifti_plotter(self, plotting_func=None, colormap=None, figsize=(15, 5),
@@ -83,19 +82,29 @@ class NiftiWidget:
         This is called by nifti_plotter, you shouldn't call it directly.
         """
 
-        # load data in advance
-        self.data = nib.load(self.filename).dataobj.get_unscaled()
+        if not ((self.data.ndim==3) or (self.data.ndim==4)):
+            raise ValueError('Input image should be 3D or 4D')
 
         # mask the background
         if mask_background:
-            labels, n_labels = scipy.ndimage.measurements.label(
-                (np.round(self.data) == 0))
+            if self.data.ndim==3:
+                labels, n_labels = scipy.ndimage.measurements.label(
+                                            (np.round(self.data) == 0))
+            else: #4D
+                labels, n_labels = scipy.ndimage.measurements.label(
+                                        (np.round(self.data).max(axis=3) == 0))
+
             mask_labels = [lab for lab in range(1, n_labels+1)
                            if (np.any(labels[[0, -1], :, :] == lab) |
                            np.any(labels[:, [0, -1], :] == lab) |
                            np.any(labels[:, :, [0, -1]] == lab))]
-            self.data = np.ma.masked_where(
-                np.isin(labels, mask_labels), self.data)
+
+            if self.data.ndim==3:
+                self.data = np.ma.masked_where(
+                    np.isin(labels, mask_labels), self.data)
+            else:
+                self.data = np.ma.masked_where(
+                    np.broadcast_to(np.isin(labels, mask_labels)[:,:,:,np.newaxis],self.data.shape), self.data)
 
         # set default x y z values
         for dim, label in enumerate(['x', 'y', 'z']):
@@ -103,12 +112,15 @@ class NiftiWidget:
                 kwargs[label] = IntSlider((self.data.shape[dim] - 1)/2,
                                           min=0, max=self.data.shape[dim] - 1, continuous_update=False)
 
+        if (self.data.ndim==3) or (self.data.shape[3]==1):
+            kwargs['t'] = fixed(0)
+        else: # 4D
+            kwargs['t'] = IntSlider(0, min=0, max=self.data.shape[3] - 1, continuous_update=False)
+
         interact(self._plot_slices, data=fixed(self.data), **kwargs)
 
 
     def _init_figure(self, data, colormap, figsize):
-        # put chunk below in _init_figure
-
         self.fig, axes = plt.subplots(1, 3, figsize=figsize)
 
         data_max = data.max()
@@ -122,7 +134,7 @@ class NiftiWidget:
                 labelbottom='off', right='off', left='off', labelleft='off'
                 )
             # fix the axis limits
-            axis_limits = [limit for jj, limit in enumerate(data.shape)
+            axis_limits = [limit for jj, limit in enumerate(data.shape[:3])
                            if jj != ii]
             ax.set_xlim(0, axis_limits[0])
             ax.set_ylim(0, axis_limits[1])
@@ -137,7 +149,7 @@ class NiftiWidget:
             self.image_handles.append(im)
 
 
-    def _plot_slices(self, data, x, y, z, colormap='viridis', figsize=(15, 5)):
+    def _plot_slices(self, data, x, y, z, t, colormap='viridis', figsize=(15, 5)):
         """
         Plots x,y,z slices.
 
@@ -153,13 +165,13 @@ class NiftiWidget:
 
         for ii, imh in enumerate(self.image_handles):
             slice_obj = 3 * [slice(None)]
+            if data.ndim==4:
+                slice_obj += [t]
             slice_obj[ii] = coords[ii]
 
             # plot the actual slice
             if ii == 0:
                 imh.set_data(np.flipud(np.rot90(data[slice_obj], k=1)))
-                # use object-oriented figure update
-                # axes[subplot].imshow
             else:
                 imh.set_data(np.flipud(np.rot90(data[slice_obj], k=3)))
             # draw guides to show where the other two slices are
@@ -169,12 +181,11 @@ class NiftiWidget:
             imh.axes.lines[1].set_ydata(2*[guide_positions[1]])
 
             imh.set_cmap(colormap)
-        # show the plot
-        # plt.show()
+
         # print the value at that point in case people need to know
         #print('Value at point {x}, {y}, {z}: {intensity}'.format(
         #    x=x, y=y, z=z, intensity=data[x, y , z]
-        #))
+        #)) # -- this print statement leads staggered figures updates
         return self.fig
 
 
@@ -184,7 +195,6 @@ class NiftiWidget:
         """
 
         self.plotting_func = plotting_func
-        self.data = nib.load(self.filename)
 
         # XYZ Sliders if plot supports it and user didn't provide any:
         if ('cut_coords' in inspect.getargspec(self.plotting_func)[0]
