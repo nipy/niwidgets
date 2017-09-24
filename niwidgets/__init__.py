@@ -2,3 +2,4 @@
 from .exampledata import exampleatlas, examplezmap, examplet1
 # import main class
 from .niwidget import NiftiWidget
+from .streamlines import StreamlineWidget
