@@ -148,7 +148,7 @@ class SurfaceWidget:
 
         if isinstance(self.meshfile,str):
             if not os.path.exists(self.meshfile):
-                raise ValueError('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
+                raise IOError('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
             filename, file_extension = os.path.splitext(self.meshfile)
             if file_extension is '.gii':
                 mesh = nb.load(self.meshfile)
@@ -181,7 +181,7 @@ class SurfaceWidget:
         for ii, overlayfile in enumerate(self.overlayfiles):
             if isinstance(overlayfile,str):
                 if not os.path.exists(overlayfile):
-                    raise ValueError('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
+                    raise IOError('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
                 filename, file_extension = os.path.splitext(overlayfile)
 
                 if file_extension is '.gii':
