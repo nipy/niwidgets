@@ -27,6 +27,6 @@ setup(
     install_requires=['ipywidgets', 'nilearn', 'nibabel'],
     # Include the template file
     package_data={
-        '': ['data/*nii*']
+        '': ['data/*nii*','data/examples_surfaces/lh.*','data/examples_surfaces/*.ctab']
     },
 )
