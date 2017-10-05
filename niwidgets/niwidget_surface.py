@@ -75,65 +75,6 @@ class SurfaceWidget:
 
         #return self.fig
 
-    def zmask(surf,mask):
-        '''
-            Masks out vertices with intensity=0 from overlay. Also returns masked-out vertices.
-
-            Parameters
-            ----------
-            surf: gifti object
-                already loaded gifti object of target surface
-            mask: gifti object
-                already loaded gifti object of overlay with zeroes at vertices of no interest (e.g. medial wall)
-        '''
-        keep=(mask.darrays[0].data!=0) # nonzero values of mask
-        kill=(mask.darrays[0].data==0) # zero values of mask
-        ikeep=[i for i, e in enumerate(keep) if e != 0] # indices of nonzero mask values
-        ikill=[i for i, e in enumerate(kill) if e != 0] # indices of zero mask values
-        killdict={ii:1 for ii in ikill} # fun fact, iterating over a dictionary is ~exponentially faster vs. over a list
-        mask_kill=np.zeros([surf.darrays[1].data.shape[0]],dtype=bool) # create empty arrays matching surface mesh dimentions
-        mask_keep=mask_kill.copy()
-        for ii, row in enumerate(surf.darrays[1].data):
-            for item in row:
-                if item in killdict.keys():
-                    mask_kill[ii]=True
-                    continue
-                else:
-                    mask_keep[ii]=True
-                    continue
-        return mask_keep, mask_kill
-
-
-    def surface_plotter(self, colormap=None,
-                        figsize=np.array([600,600]),
-                        figlims=np.array([[-100,100],[-100,100],[-100,100]]),
-                        showZeroes=True,
-                        **kwargs):
-        '''
-            Displays a surface mesh with/without an overlay inside Jupyter notebook for interactive visualization.
-
-            Basic functionality:
-            Read mesh and overlay data
-            Setup the interactive widget
-            Set defaults for plotting
-
-            Parameters
-            ----------
-            surface: str, gifti object
-                Path to surface file in gifti or FS surface format or an already loaded gifti object of surface
-            overlay: str, gifti object
-                Path to overlay file in gifti or FS annot or anaotimcal (.curv,.sulc,.thickness) format or an already loaded
-                gifti object of overlay, default None
-            colormap: string
-                A matplotlib colormap, default summer
-            figsize: ndarray
-                Size of the figure to display, default [600,600]
-            figLims: ndarray
-                x,y and z limits of the axes, default [[-100,100],[-100,100],[-100,100]])
-            showZeroes: bool
-                Display vertices with intensity = 0, default True
-
-    '''
         # set default colormap options & add them to the kwargs
         if colormap is None:
             kwargs['colormap'] = ['viridis'] + \
@@ -148,7 +89,6 @@ class SurfaceWidget:
 
         if isinstance(self.meshfile,str):
             if not os.path.exists(self.meshfile):
-                raise IOError('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
             filename, file_extension = os.path.splitext(self.meshfile)
             if file_extension is '.gii':
                 mesh = nb.load(self.meshfile)
@@ -181,7 +121,6 @@ class SurfaceWidget:
         for ii, overlayfile in enumerate(self.overlayfiles):
             if isinstance(overlayfile,str):
                 if not os.path.exists(overlayfile):
-                    raise IOError('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
                 filename, file_extension = os.path.splitext(overlayfile)
 
                 if file_extension is '.gii':
@@ -201,12 +140,6 @@ class SurfaceWidget:
                     overlays[:,ii]=overlayfile.darrays[0].data
                 except:
                     raise ValueError('Please provide a valid gifti file')
-
-            if showZeroes is False:
-                try:
-                    mkeep,mkill=zmask(surface,overlay)
-                except:
-                    raise ValueError('Overlay required for medial wall masking.')
 
         kwargs['triangles'] = fixed(vertex_edges)
         kwargs['x'] = fixed(x)

@@ -5,3 +5,4 @@ nibabel
 ipywidgets
 scikit-learn
 nilearn
+ipyvolume
