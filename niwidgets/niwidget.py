@@ -2,7 +2,8 @@ from __future__ import print_function
 import nibabel as nib
 import matplotlib.pyplot as plt
 import numpy as np
-from ipywidgets import interact, fixed, IntSlider
+from ipywidgets import interact, fixed, IntSlider, interactive
+from IPython.display import display
 import os
 import inspect
 import scipy.ndimage
@@ -28,6 +29,7 @@ class NiftiWidget:
         # this ensures once the widget is created that the file is of a format
         # readable by nibabel
         self.data = nib.load(filename).dataobj.get_unscaled()
+        # initialise where the image handles will go
         self.image_handles = None
 
     def nifti_plotter(self, plotting_func=None, colormap=None, figsize=(15, 5),
@@ -81,7 +83,9 @@ class NiftiWidget:
 
         This is called by nifti_plotter, you shouldn't call it directly.
         """
-
+        
+        plt.ioff()  # disable interactive mode
+        
         if not ((self.data.ndim==3) or (self.data.ndim==4)):
             raise ValueError('Input image should be 3D or 4D')
 
@@ -104,26 +108,81 @@ class NiftiWidget:
                     np.isin(labels, mask_labels), self.data)
             else:
                 self.data = np.ma.masked_where(
-                    np.broadcast_to(np.isin(labels, mask_labels)[:,:,:,np.newaxis],self.data.shape), self.data)
+                    np.broadcast_to(
+                        np.isin(labels, mask_labels)[:,:,:,np.newaxis],
+                        self.data.shape
+                    ),
+                    self.data
+                )
 
-        # set default x y z values
+        # init sliders for the various dimensions
         for dim, label in enumerate(['x', 'y', 'z']):
             if label not in kwargs.keys():
-                kwargs[label] = IntSlider((self.data.shape[dim] - 1)/2,
-                                          min=0, max=self.data.shape[dim] - 1, continuous_update=False)
+                kwargs[label] = IntSlider(
+                    value=(self.data.shape[dim] - 1)/2,
+                    min=0, max=self.data.shape[dim] - 1,
+                    continuous_update=False
+                )
 
         if (self.data.ndim==3) or (self.data.shape[3]==1):
-            kwargs['t'] = fixed(0)
-        else: # 4D
-            kwargs['t'] = IntSlider(0, min=0, max=self.data.shape[3] - 1, continuous_update=False)
-
+            kwargs['t'] = fixed(0)  # time is fixed
+        else:  # 4D
+            kwargs['t'] = IntSlider(
+                value=0, min=0, max=self.data.shape[3] - 1,
+                continuous_update=False
+            )
+                
         interact(self._plot_slices, data=fixed(self.data), **kwargs)
+
+        plt.close()  # clear plot
+        plt.ion()  # return to interactive state
+
+
+    def _plot_slices(self, data, x, y, z, t, colormap='viridis', figsize=(15, 5)):
+        """
+        Plots x,y,z slices.
+
+        This function is called by
+        """
+        
+        if self.image_handles is None:
+            self._init_figure(data, colormap, figsize)
+
+        coords = [x, y, z]
+        views = ['Sagittal', 'Coronal', 'Axial']
+
+
+        for ii, imh in enumerate(self.image_handles):
+            
+            slice_obj = 3 * [slice(None)]
+            
+            if data.ndim==4:
+                slice_obj += [t]
+            
+            slice_obj[ii] = coords[ii]
+
+            # update the image
+            if ii == 0:
+                imh.set_data(np.flipud(np.rot90(data[slice_obj], k=1)))
+            else:
+                imh.set_data(np.flipud(np.rot90(data[slice_obj], k=3)))
+            
+            # draw guides to show selected coordinates
+            guide_positions = [val for jj, val in enumerate(coords)
+                               if jj != ii]
+            imh.axes.lines[0].set_xdata(2*[guide_positions[0]])
+            imh.axes.lines[1].set_ydata(2*[guide_positions[1]])
+
+            imh.set_cmap(colormap)
+
+        return self.fig
 
 
     def _init_figure(self, data, colormap, figsize):
+        # init an empty list
+        self.image_handles = []
+        # open the figure
         self.fig, axes = plt.subplots(1, 3, figsize=figsize)
-
-        data_max = data.max()
 
         for ii, ax in enumerate(axes):
 
@@ -140,53 +199,15 @@ class NiftiWidget:
             ax.set_ylim(0, axis_limits[1])
 
             img = np.zeros(axis_limits[::-1])
-            img[1] = data_max
-            im = ax.imshow(img, cmap=colormap)
-
+            # img[1] = data_max
+            im = ax.imshow(img, cmap=colormap,
+                           vmin=data.min(), vmax=data.max())
+            # add "cross hair"
             ax.axvline(x=0, color='gray', alpha=0.8)
             ax.axhline(y=0, color='gray', alpha=0.8)
-
+            # append to image handles
             self.image_handles.append(im)
-
-
-    def _plot_slices(self, data, x, y, z, t, colormap='viridis', figsize=(15, 5)):
-        """
-        Plots x,y,z slices.
-
-        This function is called by
-        """
-        if self.image_handles is None:
-            self.image_handles = []
-            self._init_figure(data, colormap, figsize)
-
-        coords = [x, y, z]
-        views = ['Sagittal', 'Coronal', 'Axial']
-
-
-        for ii, imh in enumerate(self.image_handles):
-            slice_obj = 3 * [slice(None)]
-            if data.ndim==4:
-                slice_obj += [t]
-            slice_obj[ii] = coords[ii]
-
-            # plot the actual slice
-            if ii == 0:
-                imh.set_data(np.flipud(np.rot90(data[slice_obj], k=1)))
-            else:
-                imh.set_data(np.flipud(np.rot90(data[slice_obj], k=3)))
-            # draw guides to show where the other two slices are
-            guide_positions = [val for jj, val in enumerate(coords)
-                               if jj != ii]
-            imh.axes.lines[0].set_xdata(2*[guide_positions[0]])
-            imh.axes.lines[1].set_ydata(2*[guide_positions[1]])
-
-            imh.set_cmap(colormap)
-
-        # print the value at that point in case people need to know
-        #print('Value at point {x}, {y}, {z}: {intensity}'.format(
-        #    x=x, y=y, z=z, intensity=data[x, y , z]
-        #)) # -- this print statement leads staggered figures updates
-        return self.fig
+        # plt.show()
 
 
     def _custom_plotter(self, plotting_func, **kwargs):
