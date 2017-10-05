@@ -2,11 +2,11 @@ from __future__ import print_function
 import nibabel as nib
 import matplotlib.pyplot as plt
 import numpy as np
-from ipywidgets import interact, fixed
+from ipywidgets import interact, fixed, IntSlider, interactive
+from IPython.display import display
 import os
 import inspect
 import scipy.ndimage
-
 
 class NiftiWidget:
     """
@@ -25,12 +25,12 @@ class NiftiWidget:
             # for Python3 should have FileNotFoundError here
             raise IOError('file {} not found'.format(filename))
 
-        # TODO:
-        # could also add a check here that input file is in one of the formats
-        # that nibabel can read
-
-        self.filename = filename
-
+        # load data in advance
+        # this ensures once the widget is created that the file is of a format
+        # readable by nibabel
+        self.data = nib.load(filename).dataobj.get_unscaled()
+        # initialise where the image handles will go
+        self.image_handles = None
 
     def nifti_plotter(self, plotting_func=None, colormap=None, figsize=(15, 5),
                       **kwargs):
@@ -83,71 +83,131 @@ class NiftiWidget:
 
         This is called by nifti_plotter, you shouldn't call it directly.
         """
-
-        # load data in advance
-        self.data = nib.load(self.filename).dataobj.get_unscaled()
+        
+        plt.ioff()  # disable interactive mode
+        
+        if not ((self.data.ndim==3) or (self.data.ndim==4)):
+            raise ValueError('Input image should be 3D or 4D')
 
         # mask the background
         if mask_background:
-            labels, n_labels = scipy.ndimage.measurements.label(
-                (np.round(self.data) == 0))
+            if self.data.ndim==3:
+                labels, n_labels = scipy.ndimage.measurements.label(
+                                            (np.round(self.data) == 0))
+            else: #4D
+                labels, n_labels = scipy.ndimage.measurements.label(
+                                        (np.round(self.data).max(axis=3) == 0))
+
             mask_labels = [lab for lab in range(1, n_labels+1)
                            if (np.any(labels[[0, -1], :, :] == lab) |
                            np.any(labels[:, [0, -1], :] == lab) |
                            np.any(labels[:, :, [0, -1]] == lab))]
-            self.data = np.ma.masked_where(
-                np.isin(labels, mask_labels), self.data)
 
-        # set default x y z values
+            if self.data.ndim==3:
+                self.data = np.ma.masked_where(
+                    np.isin(labels, mask_labels), self.data)
+            else:
+                self.data = np.ma.masked_where(
+                    np.broadcast_to(
+                        np.isin(labels, mask_labels)[:,:,:,np.newaxis],
+                        self.data.shape
+                    ),
+                    self.data
+                )
+
+        # init sliders for the various dimensions
         for dim, label in enumerate(['x', 'y', 'z']):
             if label not in kwargs.keys():
-                kwargs[label] = (0, self.data.shape[dim] - 1)
+                kwargs[label] = IntSlider(
+                    value=(self.data.shape[dim] - 1)/2,
+                    min=0, max=self.data.shape[dim] - 1,
+                    continuous_update=False
+                )
 
+        if (self.data.ndim==3) or (self.data.shape[3]==1):
+            kwargs['t'] = fixed(0)  # time is fixed
+        else:  # 4D
+            kwargs['t'] = IntSlider(
+                value=0, min=0, max=self.data.shape[3] - 1,
+                continuous_update=False
+            )
+                
         interact(self._plot_slices, data=fixed(self.data), **kwargs)
 
+        plt.close()  # clear plot
+        plt.ion()  # return to interactive state
 
-    def _plot_slices(self, data, x, y, z, colormap='viridis', figsize=(15, 5)):
+
+    def _plot_slices(self, data, x, y, z, t, colormap='viridis', figsize=(15, 5)):
         """
         Plots x,y,z slices.
 
         This function is called by
         """
+        
+        if self.image_handles is None:
+            self._init_figure(data, colormap, figsize)
+
         coords = [x, y, z]
         views = ['Sagittal', 'Coronal', 'Axial']
-        fig, axes = plt.subplots(1, 3, figsize=figsize)
-        for subplot in range(3):
+
+
+        for ii, imh in enumerate(self.image_handles):
+            
             slice_obj = 3 * [slice(None)]
-            slice_obj[subplot] = coords[subplot]
-            plt.sca(axes[subplot])
-            axes[subplot].set_facecolor('black')
-            axes[subplot].set_title(views[subplot])
-            axes[subplot].tick_params(
+            
+            if data.ndim==4:
+                slice_obj += [t]
+            
+            slice_obj[ii] = coords[ii]
+
+            # update the image
+            if ii == 0:
+                imh.set_data(np.flipud(np.rot90(data[slice_obj], k=1)))
+            else:
+                imh.set_data(np.flipud(np.rot90(data[slice_obj], k=3)))
+            
+            # draw guides to show selected coordinates
+            guide_positions = [val for jj, val in enumerate(coords)
+                               if jj != ii]
+            imh.axes.lines[0].set_xdata(2*[guide_positions[0]])
+            imh.axes.lines[1].set_ydata(2*[guide_positions[1]])
+
+            imh.set_cmap(colormap)
+
+        return self.fig
+
+
+    def _init_figure(self, data, colormap, figsize):
+        # init an empty list
+        self.image_handles = []
+        # open the figure
+        self.fig, axes = plt.subplots(1, 3, figsize=figsize)
+
+        for ii, ax in enumerate(axes):
+
+            ax.set_facecolor('black')
+
+            ax.tick_params(
                 axis='both', which='both', bottom='off', top='off',
                 labelbottom='off', right='off', left='off', labelleft='off'
                 )
             # fix the axis limits
-            axis_limits = [limit for i, limit in enumerate(data.shape)
-                           if i != subplot]
-            axes[subplot].set_xlim(0, axis_limits[0])
-            axes[subplot].set_ylim(0, axis_limits[1])
-            # plot the actual slice
-            if subplot == 0:
-                plt.imshow(np.flipud(np.rot90(data[slice_obj], k=1)),
-                           cmap=colormap)
-            else:
-                plt.imshow(np.rot90(data[slice_obj], k=3), cmap=colormap)
-            # draw guides to show where the other two slices are
-            guide_positions = [val for i, val in enumerate(coords)
-                               if i != subplot]
-            plt.axvline(x=guide_positions[0], color='gray', alpha=0.8)
-            plt.axhline(y=guide_positions[1], color='gray', alpha=0.8)
+            axis_limits = [limit for jj, limit in enumerate(data.shape[:3])
+                           if jj != ii]
+            ax.set_xlim(0, axis_limits[0])
+            ax.set_ylim(0, axis_limits[1])
 
-        # show the plot
-        plt.show()
-        # print the value at that point in case people need to know
-        print('Value at point {x}, {y}, {z}: {intensity}'.format(
-            x=x, y=y, z=z, intensity=data[x, y , z]
-        ))
+            img = np.zeros(axis_limits[::-1])
+            # img[1] = data_max
+            im = ax.imshow(img, cmap=colormap,
+                           vmin=data.min(), vmax=data.max())
+            # add "cross hair"
+            ax.axvline(x=0, color='gray', alpha=0.8)
+            ax.axhline(y=0, color='gray', alpha=0.8)
+            # append to image handles
+            self.image_handles.append(im)
+        # plt.show()
 
 
     def _custom_plotter(self, plotting_func, **kwargs):
@@ -156,7 +216,6 @@ class NiftiWidget:
         """
 
         self.plotting_func = plotting_func
-        self.data = nib.load(self.filename)
 
         # XYZ Sliders if plot supports it and user didn't provide any:
         if ('cut_coords' in inspect.getargspec(self.plotting_func)[0]
