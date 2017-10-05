@@ -74,24 +74,23 @@ class SurfaceWidget:
         self.fig = p3.figure(width=figsize[0], height=figsize[1])
         self.fig.camera_fov = 1
         self.fig.style = {'axes': {'color': 'black',
-                     'label': {'color': 'black'},
-                     'ticklabel': {'color': 'black'},
-                     'visible': False},
-                     'background-color': 'white',
-                     'box': {'visible': False}}
+                                   'label': {'color': 'black'},
+                                   'ticklabel': {'color': 'black'},
+                                   'visible': False},
+                          'background-color': 'white',
+                          'box': {'visible': False}}
         self.fig.xlim = (figlims[0][0], figlims[0][1])
         self.fig.ylim = (figlims[1][0], figlims[1][1])
         self.fig.zlim = (figlims[2][0], figlims[2][1])
 
-        # we draw the tetrahedron
-        p3.plot_trisurf(x, y, z, triangles=triangles, color=np.ones((len(x),3)))
-        #p3.show()
+        # draw the tetrahedron
+        p3.plot_trisurf(x, y, z, triangles=triangles,
+                        color=np.ones((len(x), 3)))
 
     def _plot_surface(self, x, y, z, triangles,
                       overlays=None, frame=0,
-                      colormap='summer',
-                      figsize=np.array([600,600]),
-                      figlims=np.array([[-100,100],[-100,100],[-100,100]])):
+                      colormap='summer', figsize=np.array([600, 600]),
+                      figlims=np.array(3 * [[-100, 100]])):
         """
         Visualize/update the overlay.
 
