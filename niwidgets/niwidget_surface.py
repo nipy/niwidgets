@@ -3,11 +3,13 @@ from __future__ import print_function
 import nibabel as nb
 import matplotlib.pyplot as plt
 import numpy as np
-from ipywidgets import interact, interactive, fixed, IntSlider
-from ipyvolume import gcf
+from IPython.display import display
+from ipywidgets import interact, fixed, IntSlider
+# from ipyvolume import gcf
 import ipyvolume.pylab as p3
-import ipyvolume.widgets as ipv
 import os
+from pathlib import Path
+
 
 class SurfaceWidget:
     def __init__(self, meshfile, overlayfiles):
