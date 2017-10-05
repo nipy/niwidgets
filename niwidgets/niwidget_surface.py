@@ -75,15 +75,6 @@ class SurfaceWidget:
 
         #return self.fig
 
-    def surface_plotter(self, colormap=None,
-                        figsize=np.array([600,600]),
-                        figlims=np.array([[-100,100],[-100,100],[-100,100]]),
-                        **kwargs):
-        '''
-            Read mesh and overlay data
-            Setup the interactive widget
-            Set defaults for plotting
-        '''
         # set default colormap options & add them to the kwargs
         if colormap is None:
             kwargs['colormap'] = ['viridis'] + \
@@ -98,7 +89,6 @@ class SurfaceWidget:
 
         if isinstance(self.meshfile,str):
             if not os.path.exists(self.meshfile):
-                error('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
             filename, file_extension = os.path.splitext(self.meshfile)
             if file_extension is '.gii':
                 mesh = nb.load(self.meshfile)
@@ -131,7 +121,6 @@ class SurfaceWidget:
         for ii, overlayfile in enumerate(self.overlayfiles):
             if isinstance(overlayfile,str):
                 if not os.path.exists(overlayfile):
-                    error('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
                 filename, file_extension = os.path.splitext(overlayfile)
 
                 if file_extension is '.gii':
