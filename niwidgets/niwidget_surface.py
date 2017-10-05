@@ -134,6 +134,7 @@ class SurfaceWidget:
                 Display vertices with intensity = 0, default True
 
     '''
+        
         # set default colormap options & add them to the kwargs
         if colormap is None:
             kwargs['colormap'] = ['viridis'] + \
@@ -149,6 +150,7 @@ class SurfaceWidget:
         if isinstance(self.meshfile,str):
             if not os.path.exists(self.meshfile):
                 raise IOError('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
+            
             filename, file_extension = os.path.splitext(self.meshfile)
             if file_extension is '.gii':
                 mesh = nb.load(self.meshfile)
@@ -170,7 +172,7 @@ class SurfaceWidget:
                 x, y, z = vertex_spatial.T
             except:
                 raise ValueError('Please provide a valid gifti file.')
-
+        
         if isinstance(self.overlayfiles,list):
             max_frame = len(self.overlayfiles)-1
         else:
@@ -182,6 +184,7 @@ class SurfaceWidget:
             if isinstance(overlayfile,str):
                 if not os.path.exists(overlayfile):
                     raise IOError('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
+                
                 filename, file_extension = os.path.splitext(overlayfile)
 
                 if file_extension is '.gii':
@@ -201,13 +204,13 @@ class SurfaceWidget:
                     overlays[:,ii]=overlayfile.darrays[0].data
                 except:
                     raise ValueError('Please provide a valid gifti file')
-
+            
             if showZeroes is False:
                 try:
                     mkeep,mkill=zmask(surface,overlay)
                 except:
                     raise ValueError('Overlay required for medial wall masking.')
-
+        
         kwargs['triangles'] = fixed(vertex_edges)
         kwargs['x'] = fixed(x)
         kwargs['y'] = fixed(y)
