@@ -1,4 +1,5 @@
-from setuptools import setup, find_packages
+"""Installer."""
+from setuptools import setup
 # To use a consistent encoding
 from codecs import open
 from os import path
@@ -23,10 +24,12 @@ setup(
     author='Bjoern Soergel & Jan Freyberg',
     author_email='jan.freyberg@gmail.com',
     packages=['niwidgets'],
-    keywords = ['widgets', 'neuroimaging'],
+    keywords=['widgets', 'neuroimaging'],
     install_requires=['ipywidgets', 'nilearn', 'nibabel', 'ipyvolume'],
     # Include the template file
     package_data={
-        '': ['data/*nii*','data/examples_surfaces/lh.*','data/examples_surfaces/*.ctab']
+        '': ['data/*nii*',
+             'data/examples_surfaces/lh.*',
+             'data/examples_surfaces/*.ctab']
     },
 )
