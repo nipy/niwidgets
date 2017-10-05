@@ -12,9 +12,9 @@ from pathlib import Path
 
 
 class SurfaceWidget:
-    def __init__(self, meshfile, overlayfiles):
     """Interact with brain surfaces right in the notebook."""
 
+    def __init__(self, meshfile, overlayfiles=[]):
         """
         Create a surface widget.
 
@@ -79,24 +79,19 @@ class SurfaceWidget:
         """
         if self.fig is None:
             self._init_figure(x, y, z, triangles, figsize, figlims)
-
         # overlays is a 2D matrix
         # with 2nd dimension corresponding to (time) frame
         my_color = plt.cm.get_cmap(colormap)
-        activation = overlays[:,frame]
-        colors=my_color((activation-min(activation))/(max(activation)-min(activation)))
-        self.fig.meshes[0].color = colors[:,:3]
+        if overlays is not None:
+            activation = overlays[:, frame]
+            if max(activation) - min(activation) > 0:
+                colors = my_color((activation - min(activation))
+                                  / (max(activation) - min(activation)))
+            else:
+                colors = my_color((activation - min(activation)))
+            self.fig.meshes[0].color = colors[:, :3]
 
-        #return self.fig
-
-    def zmask(surf,mask):
-        keep=(mask.darrays[0].data!=0) # nonzero values of mask
-        kill=(mask.darrays[0].data==0) # zero values of mask
-        ikeep=[i for i, e in enumerate(keep) if e != 0] # indices of nonzero mask values
-        ikill=[i for i, e in enumerate(kill) if e != 0] # indices of zero mask values
-        killdict={ii:1 for ii in ikill} # fun fact, iterating over a dictionary is ~exponentially faster vs. over a list
-        mask_kill=np.zeros([surf.darrays[1].data.shape[0]],dtype=bool) # create empty arrays matching surface mesh dimentions
-        mask_keep=mask_kill.copy()
+    def zmask(surf, mask):
         """
         Masks out vertices with intensity=0 from overlay.
 
@@ -118,22 +113,21 @@ class SurfaceWidget:
             Boolean array of what to hide.
 
         """
+        ikill = np.flatnonzero(mask.darrays[0].data == 0)
+
+        # create empty arrays matching surface mesh dimentions
+        mask_kill = np.zeros([surf.darrays[1].data.shape[0]], dtype=bool)
+
         for ii, row in enumerate(surf.darrays[1].data):
             for item in row:
-                if item in killdict.keys():
-                    mask_kill[ii]=True
-                    continue
-                else:
-                    mask_keep[ii]=True
-                    continue
-        return mask_keep, mask_kill
+                if item in ikill:
+                    mask_kill[ii] = True
 
+        return ~mask_kill, mask_kill
 
-    def surface_plotter(self, colormap=None,
-                        figsize=np.array([600,600]),
-                        figlims=np.array([[-100,100],[-100,100],[-100,100]]),
-                        showZeroes=True,
-                        **kwargs):
+    def surface_plotter(self, colormap=None, figsize=np.array([600, 600]),
+                        figlims=np.array(3 * [[-100, 100]]),
+                        show_zeroes=True, **kwargs):
         """
         Visualise a surface mesh (with overlay) inside notebooks.
 
@@ -210,31 +204,42 @@ class SurfaceWidget:
             if isinstance(overlayfile,str):
                 if not os.path.exists(overlayfile):
                     raise IOError('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
+        if len(self.overlayfiles) > 0:
+            overlays = np.zeros((len(x), len(self.overlayfiles)))
+            for i, overlayfile in enumerate(self.overlayfiles):
+
                 filename, file_extension = os.path.splitext(overlayfile)
 
                 if file_extension is '.gii':
                     overlay = nb.load(overlayfile)
                     try:
-                        overlays[:,ii]=overlay.darrays[0].data
+                        overlays[:, i] = overlay.darrays[0].data
                     except:
                         raise ValueError('Please provide a valid gifti file')
-                elif (file_extension in ('.annot','')):
+
+                elif (file_extension in ('.annot', '')):
                     annot = nb.freesurfer.read_annot(overlayfile)
-                    overlays[:,ii] = annot[0]
-                elif (file_extension in ('.curv','.thickness','.sulc')):
-                    overlays[:,ii] = nb.freesurfer.read_morph_data(overlayfile)
+                    overlays[:, i] = annot[0]
 
-            if isinstance(overlayfile,nb.gifti.gifti.GiftiImage):
-                try:
-                    overlays[:,ii]=overlayfile.darrays[0].data
-                except:
-                    raise ValueError('Please provide a valid gifti file')
+                elif (file_extension in ('.curv', '.thickness', '.sulc')):
+                    overlays[:, i] = nb.freesurfer.read_morph_data(overlayfile)
 
-            if showZeroes is False:
-                try:
-                    mkeep,mkill=zmask(surface,overlay)
-                except:
-                    raise ValueError('Overlay required for medial wall masking.')
+                if isinstance(overlayfile, nb.gifti.gifti.GiftiImage):
+                    try:
+                        overlays[:, i] = overlayfile.darrays[0].data
+                    except:
+                        raise ValueError('Please provide a valid gifti file')
+
+                if not show_zeroes:
+                    pass
+                    # try:
+                    #     mkeep, mkill = self.zmask(surface, overlay)
+                    # except:
+                    #     raise ValueError(
+                    #         'Overlay required for medial wall masking.'
+                    #         )
+        else:
+            overlays = None
 
         kwargs['triangles'] = fixed(vertex_edges)
         kwargs['x'] = fixed(x)
@@ -242,8 +247,10 @@ class SurfaceWidget:
         kwargs['z'] = fixed(z)
         kwargs['overlays'] = fixed(overlays)
 
-        interact(self._plot_surface,
-                 frame=IntSlider(default=0,
-                                 min=0,
-                                 max=max_frame),
-                 **kwargs)
+        if len(self.overlayfiles) < 2:
+            frame = fixed(0)
+        else:
+            frame = IntSlider(value=0, min=0, max=len(self.overlayfiles) - 1)
+
+        interact(self._plot_surface, frame=frame, **kwargs)
+        display(self.fig)
