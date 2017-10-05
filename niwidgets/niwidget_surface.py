@@ -1,3 +1,4 @@
+"""A widget for surface-warped neuroimaging data."""
 from __future__ import print_function
 import nibabel as nb
 import matplotlib.pyplot as plt
@@ -10,31 +11,40 @@ import os
 
 class SurfaceWidget:
     def __init__(self, meshfile, overlayfiles):
-        '''
-            Create a surface widget
+    """Interact with brain surfaces right in the notebook."""
 
-            meshfile: file containing the
-                      (1) 3D coordinates of each vertex (V x 3 array, where V=#vertices)
-                      (2) triangle specifications (T x 3 array, where T=#triangles)
-                      Can be a FreeSurfer (i.e., lh.pial) or .gii mesh file
-            overlayfiles: overlay file containing the scalar value at each vertex (V x 1)
-                          Can be a FreeSurfer .annot, .thickness, .curv, .sulc; or .gii
-        '''
+        """
+        Create a surface widget.
+
+        meshfile: file containing the
+                  (1) 3D coordinates of each vertex (V x 3 array, where
+                  V=#vertices)
+                  (2) triangle specifications (T x 3 array, where T=#triangles)
+                  Can be a FreeSurfer (i.e., lh.pial) or .gii mesh file
+
+        overlayfiles: overlay file containing the scalar value at each vertex
+                      (V x 1)
+                      Can be a FreeSurfer .annot, .thickness, .curv, .sulc;
+                      or .gii
+
+        """
         self.meshfile = meshfile
         self.overlayfiles = overlayfiles
         #self.meshes = None
         self.fig = None
 
     def _init_figure(self, x, y, z, triangles, figsize, figlims):
-        '''
-            Initialize the figure by plotting the surface without any overlay.
-            x: x coordinates of vertices (V x 1 numpy array)
-            y: y coordinates of vertices (V x 1 numpy array)
-            z: z coordinates of vertices (V x 1 numpy array)
-            triangles: triangle specifications (T x 3 numpy array, where T=#triangles)
-            figsize: 2x1 list of integers
-            figlims: 3x2 list of integers
-        '''
+        """
+        Initialize the figure by plotting the surface without any overlay.
+
+        x: x coordinates of vertices (V x 1 numpy array)
+        y: y coordinates of vertices (V x 1 numpy array)
+        z: z coordinates of vertices (V x 1 numpy array)
+        triangles: triangle specifications (T x 3 numpy array, where
+        T=#triangles)
+        figsize: 2x1 list of integers
+        figlims: 3x2 list of integers
+        """
         self.fig = p3.figure(width=figsize[0], height=figsize[1])
         self.fig.camera_fov = 1
         self.fig.style = {'axes': {'color': 'black',
@@ -56,13 +66,15 @@ class SurfaceWidget:
                       colormap='summer',
                       figsize=np.array([600,600]),
                       figlims=np.array([[-100,100],[-100,100],[-100,100]])):
-        '''
-            Visualize/update the overlay by changing the color associated
-            with mesh vertices
+        """
+        Visualize/update the overlay.
 
-            overlays: V x F numpy array, where each column corresponds to a
-                      different overlay. F=#frames or #timepoints.
-        '''
+        This function changes the color associated with mesh vertices.
+
+        overlays: V x F numpy array, where each column corresponds to a
+                  different overlay. F=#frames or #timepoints.
+
+        """
         if self.fig is None:
             self._init_figure(x, y, z, triangles, figsize, figlims)
 
@@ -76,16 +88,6 @@ class SurfaceWidget:
         #return self.fig
 
     def zmask(surf,mask):
-        '''
-            Masks out vertices with intensity=0 from overlay. Also returns masked-out vertices.
-
-            Parameters
-            ----------
-            surf: gifti object
-                already loaded gifti object of target surface
-            mask: gifti object
-                already loaded gifti object of overlay with zeroes at vertices of no interest (e.g. medial wall)
-        '''
         keep=(mask.darrays[0].data!=0) # nonzero values of mask
         kill=(mask.darrays[0].data==0) # zero values of mask
         ikeep=[i for i, e in enumerate(keep) if e != 0] # indices of nonzero mask values
@@ -93,6 +95,27 @@ class SurfaceWidget:
         killdict={ii:1 for ii in ikill} # fun fact, iterating over a dictionary is ~exponentially faster vs. over a list
         mask_kill=np.zeros([surf.darrays[1].data.shape[0]],dtype=bool) # create empty arrays matching surface mesh dimentions
         mask_keep=mask_kill.copy()
+        """
+        Masks out vertices with intensity=0 from overlay.
+
+        Also returns masked-out vertices.
+
+        Parameters
+        ----------
+        surf: gifti object
+            already loaded gifti object of target surface
+        mask: gifti object
+            already loaded gifti object of overlay with zeroes
+            at vertices of no interest (e.g. medial wall)
+
+        Returns
+        -------
+        mask_keep: np.ndarray
+            Boolean array of what to show.
+        mask_kill: np.ndarray
+            Boolean array of what to hide.
+
+        """
         for ii, row in enumerate(surf.darrays[1].data):
             for item in row:
                 if item in killdict.keys():
@@ -109,31 +132,34 @@ class SurfaceWidget:
                         figlims=np.array([[-100,100],[-100,100],[-100,100]]),
                         showZeroes=True,
                         **kwargs):
-        '''
-            Displays a surface mesh with/without an overlay inside Jupyter notebook for interactive visualization.
+        """
+        Visualise a surface mesh (with overlay) inside notebooks.
 
-            Basic functionality:
-            Read mesh and overlay data
-            Setup the interactive widget
-            Set defaults for plotting
+        Basic functionality:
+        Read mesh and overlay data
+        Setup the interactive widget
+        Set defaults for plotting
 
-            Parameters
-            ----------
-            surface: str, gifti object
-                Path to surface file in gifti or FS surface format or an already loaded gifti object of surface
-            overlay: str, gifti object
-                Path to overlay file in gifti or FS annot or anaotimcal (.curv,.sulc,.thickness) format or an already loaded
-                gifti object of overlay, default None
-            colormap: string
-                A matplotlib colormap, default summer
-            figsize: ndarray
-                Size of the figure to display, default [600,600]
-            figLims: ndarray
-                x,y and z limits of the axes, default [[-100,100],[-100,100],[-100,100]])
-            showZeroes: bool
-                Display vertices with intensity = 0, default True
+        Parameters
+        ----------
+        surface: str, gifti object
+            Path to surface file in gifti or FS surface format or an
+            already loaded gifti object of surface
+        overlay: str, gifti object
+            Path to overlay file in gifti or FS annot or anatomical
+            (.curv,.sulc,.thickness) format or an already loaded
+            gifti object of overlay, default None
+        colormap: string
+            A matplotlib colormap, default summer
+        figsize: ndarray
+            Size of the figure to display, default [600,600]
+        figlims: ndarray
+            x,y and z limits of the axes, default
+            [[-100,100],[-100,100],[-100,100]]
+        show_zeroes: bool
+            Display vertices with intensity = 0, default True
 
-    '''
+        """
         # set default colormap options & add them to the kwargs
         if colormap is None:
             kwargs['colormap'] = ['viridis'] + \
