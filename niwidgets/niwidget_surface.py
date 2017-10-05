@@ -190,43 +190,32 @@ class SurfaceWidget:
         kwargs['figsize'] = fixed(figsize)
         kwargs['figlims'] = fixed(figlims)
 
-
-        if isinstance(self.meshfile,str):
-            if not os.path.exists(self.meshfile):
-                raise IOError('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
-            filename, file_extension = os.path.splitext(self.meshfile)
-            if file_extension is '.gii':
-                mesh = nb.load(self.meshfile)
+        if isinstance(self.meshfile, Path):
+            # if mesh has not been loaded before, load it
+            if self.meshfile.suffix == '.gii':
+                # load gifti file
+                self.meshfile = nb.load(self.meshfile)
                 try:
-                    vertex_spatial=mesh.darrays[0].data
-                    vertex_edges=mesh.darrays[1].data
+                    vertex_spatial = self.meshfile.darrays[0].data
+                    vertex_edges = self.meshfile.darrays[1].data
                     x, y, z = vertex_spatial.T
                 except:
                     raise ValueError('Please provide a valid gifti file.')
             else:
+                # load freesurfer file
                 fsgeometry = nb.freesurfer.read_geometry(self.meshfile)
-                x,y,z = fsgeometry[0].T
-                vertex_edges=fsgeometry[1]
+                x, y, z = fsgeometry[0].T
+                vertex_edges = fsgeometry[1]
 
-        if isinstance(self.meshfile,nb.gifti.gifti.GiftiImage):
+        elif isinstance(self.meshfile, nb.gifti.gifti.GiftiImage):
+            # if mesh has been loaded as a GiftiImage, format the data
             try:
-                vertex_spatial=self.meshfile.darrays[0].data
-                vertex_edges=self.meshfile.darrays[1].data
+                vertex_spatial = self.meshfile.darrays[0].data
+                vertex_edges = self.meshfile.darrays[1].data
                 x, y, z = vertex_spatial.T
             except:
                 raise ValueError('Please provide a valid gifti file.')
 
-        if isinstance(self.overlayfiles,list):
-            max_frame = len(self.overlayfiles)-1
-        else:
-            max_frame = 0
-            self.overlayfiles = [self.overlayfiles] # hack
-
-        overlays = np.zeros((len(x),len(self.overlayfiles)))
-        for ii, overlayfile in enumerate(self.overlayfiles):
-            if isinstance(overlayfile,str):
-                if not os.path.exists(overlayfile):
-                    raise IOError('File does not exist, please provide a valid file path to a gifti or FreeSurfer file.')
         if len(self.overlayfiles) > 0:
             overlays = np.zeros((len(x), len(self.overlayfiles)))
             for i, overlayfile in enumerate(self.overlayfiles):
