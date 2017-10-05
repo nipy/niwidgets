@@ -30,9 +30,33 @@ class SurfaceWidget:
                       or .gii
 
         """
+        # check meshfile is a valid argument
         self.meshfile = meshfile
-        self.overlayfiles = overlayfiles
-        #self.meshes = None
+        if isinstance(self.meshfile, (str, Path)):
+            # enforce that file is Path object here & also that it exists
+            self.meshfile = Path(self.meshfile).resolve(strict=True)
+        elif isinstance(self.meshfile, nb.gifti.gifti.GiftiImage):
+            pass
+        else:
+            raise TypeError('meshfile needs to be either a path to a valid'
+                            + ' file or a nibabel GiftiImage.')
+
+        # ensure overlayfiles is a list
+        if not isinstance(overlayfiles, (list)):
+            self.overlayfiles = [overlayfiles]
+        else:
+            self.overlayfiles = overlayfiles
+
+        # convert all overlay strings to a path object
+        for i, f in enumerate(self.overlayfiles):
+            if isinstance(f, (str, Path)):
+                self.overlayfiles[i] = Path(f).resolve(strict=True)
+            elif isinstance(f, nb.gifti.gifti.GiftiImage):
+                pass
+            else:
+                raise TypeError('meshfile needs to be either a path to a valid'
+                                + ' file or a nibabel GiftiImage.')
+
         self.fig = None
 
     def _init_figure(self, x, y, z, triangles, figsize, figlims):
