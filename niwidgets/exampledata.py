@@ -1,7 +1,17 @@
-import os
+"""Example files for use with niwidgets."""
+from pathlib import Path
 
-# define the example data
-root_dir, _ = os.path.split(__file__)
-exampleatlas = os.path.join(root_dir, 'data', 'cc400_roi_atlas.nii')
-examplezmap = os.path.join(root_dir, 'data', 'cognitive control_pFgA_z.nii.gz')
-examplet1 = os.path.join(root_dir, 'data', 'T1.nii.gz')
+
+root_dir = Path(__file__).parent / 'data'
+
+exampleatlas = root_dir / 'cc400_roi_atlas.nii'
+examplezmap = root_dir / 'cognitive control_pFgA_z.nii.gz'
+examplet1 = root_dir / 'T1.nii.gz'
+
+surface_dir = root_dir / 'example_surfaces'
+
+examplesurface = surface_dir / 'lh.inflated'
+exampleoverlays = [
+    surface_dir / f
+    for f in ('lh.area', 'lh.curv', 'lh.thickness', 'lh.aparc.annot')
+]
