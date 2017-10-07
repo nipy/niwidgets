@@ -164,12 +164,13 @@ class NiftiWidget:
             ax.set_title(views[i])
 
         for ii, imh in enumerate(self.image_handles):
-            
+
             slice_obj = 3 * [slice(None)]
             
-            if data.ndim==4:
+
+            if data.ndim == 4:
                 slice_obj += [t]
-            
+
             slice_obj[ii] = coords[ii]
 
             # update the image
@@ -184,7 +185,6 @@ class NiftiWidget:
             imh.set_cmap(colormap)
 
         return self.fig
-
 
     def _init_figure(self, data, colormap, figsize):
         # init an empty list
@@ -217,18 +217,18 @@ class NiftiWidget:
             self.image_handles.append(im)
         # plt.show()
 
-
     def _custom_plotter(self, plotting_func, **kwargs):
         """Collect data and start interactive widget for custom plot."""
         self.plotting_func = plotting_func
 
         # XYZ Sliders if plot supports it and user didn't provide any:
         if ('cut_coords' in inspect.getargspec(self.plotting_func)[0]
-            and 'cut_coords' not in kwargs.keys()):
+                and 'cut_coords' not in kwargs.keys()):
             for label in ['x', 'y', 'z']:
                 if label not in kwargs.keys():
                     # cut_coords should be given in MNI coordinates
-                    kwargs[label] = (-90, 90)
+                    kwargs[label] = IntSlider(value=0, min=-90, max=90,
+                                              continuous_update=False)
 
         # Create the widget:
         interact(self._custom_plot_wrapper, data=fixed(self.data), **kwargs)
@@ -250,7 +250,7 @@ class NiftiWidget:
 
         # reconstruct manually added x-y-z-sliders:
         if ('cut_coords' in inspect.getargspec(self.plotting_func)[0]
-            and 'x' in kwargs.keys()):
+                and 'x' in kwargs.keys()):
 
             # add the x-y-z as cut_coords
             if ('display_mode' not in kwargs.keys()
