@@ -173,11 +173,8 @@ class NiftiWidget:
             slice_obj[ii] = coords[ii]
 
             # update the image
-            if ii == 0:
-                imh.set_data(np.flipud(np.rot90(data[slice_obj], k=1)))
-            else:
-                imh.set_data(np.flipud(np.rot90(data[slice_obj], k=3)))
-            
+            imh.set_data(np.flipud(np.rot90(data[slice_obj], k=1)))
+
             # draw guides to show selected coordinates
             guide_positions = [val for jj, val in enumerate(coords)
                                if jj != ii]
