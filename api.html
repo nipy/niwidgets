@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
     <title>API &#8212; niwidgets 0.1.3 documentation</title>
+    
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -20,10 +24,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -35,7 +39,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body>
+  <body role="document">
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -67,6 +71,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Usage: <code class="docutils literal"><span class="pre">niwidgets</span></code> examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html#Volume-data">Volume data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html#Surface-data">Surface data</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a></li>
 </ul>
 </ul>
@@ -139,7 +145,10 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="api/niwidgets.NiftiWidget.html#niwidgets.NiftiWidget" title="niwidgets.NiftiWidget"><code class="xref py py-obj docutils literal"><span class="pre">NiftiWidget</span></code></a>(filename)</td>
-<td>Turns .nii files into interactive plots using ipywidgets.</td>
+<td>Turn .nii files into interactive plots using ipywidgets.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/niwidgets.SurfaceWidget.html#niwidgets.SurfaceWidget" title="niwidgets.SurfaceWidget"><code class="xref py py-obj docutils literal"><span class="pre">SurfaceWidget</span></code></a>(meshfile[,&nbsp;overlayfiles])</td>
+<td>Interact with brain surfaces right in the notebook.</td>
 </tr>
 </tbody>
 </table>
@@ -158,7 +167,7 @@
     </p>
     <p>
         &copy; Copyright 2017, Jan Freyberg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.<br/>
     </p>
   </div>
 </footer>
