@@ -166,7 +166,6 @@ class NiftiWidget:
         for ii, imh in enumerate(self.image_handles):
 
             slice_obj = 3 * [slice(None)]
-            
 
             if data.ndim == 4:
                 slice_obj += [t]
@@ -220,6 +219,8 @@ class NiftiWidget:
     def _custom_plotter(self, plotting_func, **kwargs):
         """Collect data and start interactive widget for custom plot."""
         self.plotting_func = plotting_func
+        plt.gcf().clear()
+        plt.ioff()
 
         # XYZ Sliders if plot supports it and user didn't provide any:
         if ('cut_coords' in inspect.getargspec(self.plotting_func)[0]
@@ -232,7 +233,7 @@ class NiftiWidget:
 
         # Create the widget:
         interact(self._custom_plot_wrapper, data=fixed(self.data), **kwargs)
-
+        plt.ion()
 
     def _custom_plot_wrapper(self, data, **kwargs):
         """Wrap a custom function."""
