@@ -269,22 +269,3 @@ class NiftiWidget:
         # Actually plot the image
         self.plotting_func(data, figure=fig, **kwargs)
         plt.show()
-
-
-    def surface_projection(self, pycortexid, pycortexxfm):
-        """
-        Creates interactive pycortex plots using ipywidgets.
-
-        Input: the subject ID for a subject already in your pycortex database.
-        """
-        # import pycortex in case it's not imported yet
-        import cortex
-
-        # check if the subject is in the pycortex database
-        if not pycortexid in dir(cortex.db):
-            raise IOError('Subject {} not in pycortex db.'.format(pycortexid))
-
-        self.pycortexid = pycortexid
-
-        # Surface projections in pycortex are done via "transforms", which are
-        # stored in its database.
