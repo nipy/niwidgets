@@ -153,13 +153,15 @@ class NiftiWidget:
 
         This function is called by _default_plotter
         """
-        
         if self.image_handles is None:
             self._init_figure(data, colormap, figsize)
 
         coords = [x, y, z]
-        views = ['Sagittal', 'Coronal', 'Axial']
 
+        # add plot titles to the subplots
+        views = ['Sagittal', 'Coronal', 'Axial']
+        for i, ax in enumerate(self.fig.axes):
+            ax.set_title(views[i])
 
         for ii, imh in enumerate(self.image_handles):
             
