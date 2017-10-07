@@ -9,3 +9,4 @@ The only class so far is the ``NiftiWidget`` class:
     :toctree: api
 
     NiftiWidget
+    SurfaceWidget
