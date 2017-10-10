@@ -1,5 +1,4 @@
 # Neuroimaging Widgets (`niwidgets`)
-_By [Jan Freyberg](http://www.twitter.com/janfreyberg) and [Bjoern Soergel](http://www.ast.cam.ac.uk/~bs538/)_
 
 This repository is supposed to provide easy and general wrappers to display interactive widgets that visualise standard-format neuroimaging data, using new functions and standard functions from other libraries. It looks like this:
 
@@ -57,3 +56,7 @@ Hopefully we will be able to add more default interactive features in the future
 ### Development installation
 
 As always with pip packages, you can install a _"development"_ version of this package by cloning the git repository and installing it via `pip install -e /path/to/package`.
+
+---
+
+_Developed by [Jan Freyberg](http://www.twitter.com/janfreyberg), [Bjoern Soergel](http://www.ast.cam.ac.uk/~bs538/), [Satrajit Ghosh](https://github.com/satra), [Melanie Ganz](https://github.com/melanieganz), [Murat Bilgel](https://github.com/bilgelm), [Ariel Rokem](https://github.com/arokem), and [elyb01](https://github.com/elyb01)._
