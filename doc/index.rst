@@ -10,10 +10,10 @@ Make your neuroimaging plots interactive.
 
 .. ipywidgets-display::
 
-    from niwidgets import SurfaceWidget, exampledata
+    from niwidgets import NiftiWidget, exampledata
 
-    my_widget = SurfaceWidget(exampledata.examplesurface)
-    my_widget.surface_plotter()
+    my_widget = NiftiWidget(exampledata.examplet1)
+    my_widget.nifti_plotter()
 
 .. image:: img/example.gif
 
