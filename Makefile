@@ -24,7 +24,7 @@ help:
 gh-pages:
 			git checkout gh-pages
 			rm -rf *
-			git checkout interactive-docs $(GH_PAGES_SOURCES)
+			git checkout master $(GH_PAGES_SOURCES)
 			git reset HEAD
 			cp ./index.ipynb doc/examples.ipynb
 			make html
@@ -34,4 +34,4 @@ gh-pages:
 			git add -A
 			git ci -m "Generated gh-pages for `git log master -1 --pretty=short --abbrev-commit`"
 			git push origin gh-pages
-			git checkout interactive-docs
+			git checkout master

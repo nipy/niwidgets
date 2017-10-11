@@ -89,11 +89,9 @@ class NiftiWidget:
         kwargs['figsize'] = fixed(figsize)
 
         if plotting_func is None:
-            widget = self._default_plotter(**kwargs)
+            self._default_plotter(**kwargs)
         else:
             self._custom_plotter(plotting_func, **kwargs)
-
-        return widget
 
     def _default_plotter(self, mask_background=True, **kwargs):
         """
@@ -154,12 +152,10 @@ class NiftiWidget:
                 continuous_update=False
             )
 
-        widget = interact(self._plot_slices, data=fixed(data_array), **kwargs)
+        interact(self._plot_slices, data=fixed(data_array), **kwargs)
 
         plt.close()  # clear plot
         plt.ion()  # return to interactive state
-
-        return widget
 
     def _plot_slices(self, data, x, y, z, t,
                      colormap='viridis', figsize=(15, 5)):
