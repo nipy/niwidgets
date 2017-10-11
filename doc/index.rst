@@ -8,13 +8,6 @@ Make your neuroimaging plots interactive.
 
 |
 
-.. ipywidgets-display::
-
-    from niwidgets import SurfaceWidget, exampledata
-
-    my_widget = SurfaceWidget(exampledata.examplesurface)
-    my_widget.surface_plotter()
-
 .. image:: img/example.gif
 
 |
