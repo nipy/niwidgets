@@ -90,27 +90,27 @@ class StreamlineWidget:
         p3.clear()
         fig = p3.figure(width=width, height=height)
         self.state['fig'] = fig
-        if 'style' not in kwargs:
-            fig.style = {'axes': {'color': 'black',
-                                  'label': {'color': 'black'},
-                                  'ticklabel': {'color': 'black'},
-                                  'visible': False},
-                         'background-color': 'white',
-                         'box': {'visible': False}}
-        else:
-            fig.style = kwargs['style']
-        fig.camera_fov = 1
 
-        fig.xlim = tuple(sl.header['dimensions'].max() * np.array([0, 1]))
-        fig.ylim = tuple(sl.header['dimensions'].max() * np.array([0, 1]))
-        fig.zlim = tuple(sl.header['dimensions'].max() * np.array([0, 1]))
-
-        for idx, line in enumerate(self.lines2use):
-            if 'grayscale' in kwargs and kwargs['grayscale']:
-                p3.plot(*line.T, color=[0.5, 0.5, 0.5], visible_lines=False)
+        with fig.hold_sync():
+            if 'style' not in kwargs:
+                fig.style = {'axes': {'color': 'black',
+                                      'label': {'color': 'black'},
+                                      'ticklabel': {'color': 'black'},
+                                      'visible': False},
+                             'background-color': 'white',
+                             'box': {'visible': False}}
             else:
-                p3.plot(*line.T, color=colors[idx], visible_lines=False)
+                fig.style = kwargs['style']
+            fig.camera_fov = 1
 
+            fig.xlim = tuple(sl.header['dimensions'].max() * np.array([0, 1]))
+            fig.ylim = tuple(sl.header['dimensions'].max() * np.array([0, 1]))
+            fig.zlim = tuple(sl.header['dimensions'].max() * np.array([0, 1]))
+            for idx, line in enumerate(self.lines2use):
+                if 'grayscale' in kwargs and kwargs['grayscale']:
+                    p3.plot(*line.T, color=[0.5, 0.5, 0.5], visible_lines=False)
+                else:
+                    p3.plot(*line.T, color=colors[idx], visible_lines=False)
         p3.show()
 
         interact(self._plot_lines, state=fixed(self.state),

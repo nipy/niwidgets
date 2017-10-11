@@ -8,7 +8,17 @@ from ipywidgets import interact, fixed, IntSlider
 # from ipyvolume import gcf
 import ipyvolume.pylab as p3
 import os
-from pathlib import Path
+# import pathlib & backwards compatibility
+try:
+    # on >3 this ships by default
+    from pathlib import Path
+except ModuleNotFoundError:
+    # on 2.7 this should work
+    try:
+        from pathlib2 import Path
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('On python 2.7, niwidgets requires '
+                                  'pathlib2 to be installed.')
 
 
 class SurfaceWidget:
