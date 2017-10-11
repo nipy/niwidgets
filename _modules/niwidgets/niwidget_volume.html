@@ -208,9 +208,11 @@
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span><span class="p">(</span><span class="n">figsize</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">plotting_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_default_plotter</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_plotter</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_custom_plotter</span><span class="p">(</span><span class="n">plotting_func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_custom_plotter</span><span class="p">(</span><span class="n">plotting_func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">widget</span></div>
 
     <span class="k">def</span> <span class="nf">_default_plotter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_background</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -271,10 +273,12 @@
                 <span class="n">continuous_update</span><span class="o">=</span><span class="kc">False</span>
             <span class="p">)</span>
 
-        <span class="n">interact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_slices</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">fixed</span><span class="p">(</span><span class="n">data_array</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">interact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_slices</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">fixed</span><span class="p">(</span><span class="n">data_array</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># clear plot</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>  <span class="c1"># return to interactive state</span>
+
+        <span class="k">return</span> <span class="n">widget</span>
 
     <span class="k">def</span> <span class="nf">_plot_slices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span>
                      <span class="n">colormap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">5</span><span class="p">)):</span>
