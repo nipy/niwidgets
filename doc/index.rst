@@ -8,6 +8,13 @@ Make your neuroimaging plots interactive.
 
 |
 
+.. ipywidgets-display::
+
+    from niwidgets import NiftiWidget, exampledata
+
+    my_widget = NiftiWidget(exampledata.examplet1)
+    my_widget.nifti_plotter()
+
 .. image:: img/example.gif
 
 |
