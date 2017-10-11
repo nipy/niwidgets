@@ -11,9 +11,8 @@ Make your neuroimaging plots interactive.
 .. ipywidgets-display::
 
     from niwidgets import NiftiWidget, exampledata
-
-    my_widget = NiftiWidget(exampledata.examplet1)
-    my_widget.nifti_plotter()
+    from ipywidgets import Button
+    Button()
 
 .. image:: img/example.gif
 
