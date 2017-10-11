@@ -1,5 +1,5 @@
 niwidgets.NiftiWidget
-============
+=====================
 
 
 .. currentmodule:: niwidgets
