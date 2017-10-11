@@ -6,6 +6,7 @@
     <title>Make your neuroimaging plots interactive. &#8212; niwidgets 0.1.3 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="https://unpkg.com/font-awesome@4.5.0/css/font-awesome.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -20,6 +21,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@jupyter-widgets/html-manager@^0.10.0/dist/embed.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
@@ -132,7 +134,13 @@
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
-<img alt="_images/example.gif" src="_images/example.gif" />
+<div class="highlight-python" id="jupyter-widget-0"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">niwidgets</span> <span class="kn">import</span> <span class="n">NiftiWidget</span><span class="p">,</span> <span class="n">exampledata</span>
+
+<span class="n">my_widget</span> <span class="o">=</span> <span class="n">NiftiWidget</span><span class="p">(</span><span class="n">exampledata</span><span class="o">.</span><span class="n">examplet1</span><span class="p">)</span>
+<span class="n">my_widget</span><span class="o">.</span><span class="n">nifti_plotter</span><span class="p">()</span>
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "17dd5dadc10649a1b2b1f162304a4498"}</script><img alt="_images/example.gif" src="_images/example.gif" />
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
@@ -170,7 +178,7 @@
 </ul>
 </div>
 </div>
-
+<script type="application/vnd.jupyter.widget-state+json">{"version_major": 2, "version_minor": 0, "state": {"4b80929d088d4460a0e14531828324d5": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.0.0", "state": {}}, "a1924c65c2dd4d1390aa897c34a01722": {"model_name": "SliderStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.0.0", "state": {}}, "3e2f3c510fae48b7acf3fbfb30130704": {"model_name": "IntSliderModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "continuous_update": false, "description": "x", "layout": "IPY_MODEL_4b80929d088d4460a0e14531828324d5", "max": 90, "style": "IPY_MODEL_a1924c65c2dd4d1390aa897c34a01722", "value": 45}}, "9813ba52e0b64744aea6dfbb2086aff0": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.0.0", "state": {}}, "dcd154eb85ca46bca92de07fe8db38cf": {"model_name": "SliderStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.0.0", "state": {}}, "4123888a6c8c44ff8ff878de4fe68ea0": {"model_name": "IntSliderModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "continuous_update": false, "description": "y", "layout": "IPY_MODEL_9813ba52e0b64744aea6dfbb2086aff0", "max": 108, "style": "IPY_MODEL_dcd154eb85ca46bca92de07fe8db38cf", "value": 54}}, "84e3e2d3a184426d8917bd971d949b00": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.0.0", "state": {}}, "d6e53e5d13954d34ba3df7f05ab02f53": {"model_name": "SliderStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.0.0", "state": {}}, "15a2862f8d4a4c0b914058caa2b7bb55": {"model_name": "IntSliderModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "continuous_update": false, "description": "z", "layout": "IPY_MODEL_84e3e2d3a184426d8917bd971d949b00", "max": 90, "style": "IPY_MODEL_d6e53e5d13954d34ba3df7f05ab02f53", "value": 45}}, "81945174c4134fb4b4902bc3bcfad58f": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.0.0", "state": {}}, "17dd5dadc10649a1b2b1f162304a4498": {"model_name": "VBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.0.0", "state": {"_dom_classes": ["widget-interact"], "children": ["IPY_MODEL_3e2f3c510fae48b7acf3fbfb30130704", "IPY_MODEL_4123888a6c8c44ff8ff878de4fe68ea0", "IPY_MODEL_15a2862f8d4a4c0b914058caa2b7bb55", "IPY_MODEL_18527b6b06bb4c088ee304fe84ac9985", "IPY_MODEL_bbbc7a3fb85140f0ba5d518780b372f4"], "layout": "IPY_MODEL_81945174c4134fb4b4902bc3bcfad58f"}}, "3859dd1468d9427a883398e5e9fe0d2a": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.0.0", "state": {}}, "e475abc7a843402890243abb864e4aed": {"model_name": "DescriptionStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.0.0", "state": {}}, "18527b6b06bb4c088ee304fe84ac9985": {"model_name": "DropdownModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_options_labels": ["viridis", "Accent", "Blues", "BrBG", "BuGn", "BuPu", "CMRmap", "Dark2", "GnBu", "Greens", "Greys", "OrRd", "Oranges", "PRGn", "Paired", "Pastel1", "Pastel2", "PiYG", "PuBu", "PuBuGn", "PuOr", "PuRd", "Purples", "RdBu", "RdGy", "RdPu", "RdYlBu", "RdYlGn", "Reds", "Set1", "Set2", "Set3", "Spectral", "Vega10", "Vega20", "Vega20b", "Vega20c", "Wistia", "YlGn", "YlGnBu", "YlOrBr", "YlOrRd", "afmhot", "autumn", "binary", "bone", "brg", "bwr", "cool", "coolwarm", "copper", "cubehelix", "flag", "gist_earth", "gist_gray", "gist_heat", "gist_ncar", "gist_rainbow", "gist_stern", "gist_yarg", "gnuplot", "gnuplot2", "gray", "hot", "hsv", "jet", "nipy_spectral", "ocean", "pink", "prism", "rainbow", "seismic", "spectral", "spring", "summer", "tab10", "tab20", "tab20b", "tab20c", "terrain", "winter"], "description": "colormap", "index": 0, "layout": "IPY_MODEL_3859dd1468d9427a883398e5e9fe0d2a", "style": "IPY_MODEL_e475abc7a843402890243abb864e4aed"}}, "f213c0159fed46f988641a81d7e6016d": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.0.0", "state": {}}, "bbbc7a3fb85140f0ba5d518780b372f4": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "layout": "IPY_MODEL_f213c0159fed46f988641a81d7e6016d", "outputs": []}}}}</script>
 
     </div>
       
