@@ -1,4 +1,4 @@
-niwidgets.NiftiWidget
+niwidgets.SurfaceWidget
 ============
 
 

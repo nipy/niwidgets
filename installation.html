@@ -1,16 +1,12 @@
 <!DOCTYPE html>
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>Installation &#8212; niwidgets 0.1.3 documentation</title>
-    
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -24,10 +20,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -39,7 +35,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -89,6 +85,7 @@
       aria-labelledby="dLabelLocalToc"><ul>
 <li><a class="reference internal" href="#">Installation</a><ul>
 <li><a class="reference internal" href="#install-via-pip">Install via <code class="docutils literal"><span class="pre">pip</span></code></a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
 <li><a class="reference internal" href="#development-installation">Development installation</a></li>
 </ul>
 </li>
@@ -143,16 +140,37 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="install-via-pip">
 <h2>Install via <code class="docutils literal"><span class="pre">pip</span></code><a class="headerlink" href="#install-via-pip" title="Permalink to this headline">¶</a></h2>
-<p>Install via:</p>
-<p><code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">niwidgets</span></code></p>
-<p>Or via:</p>
-<p><code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">git+git://github.com/janfreyberg/niwidgets/</span></code></p>
-<p>It requires nibabel and nilearn:</p>
-<p><code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">nibabel</span> <span class="pre">nilearn</span></code></p>
+<p>Install latest stable from pypi via::</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">niwidgets</span>
+</pre></div>
+</div>
+<p>Install the latest development version::</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">git</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">janfreyberg</span><span class="o">/</span><span class="n">niwidgets</span><span class="o">/</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>When you install niwidgets via <cite>pip</cite>, it will automatically install the packages it depends on. However, you will have to make sure that they are enabled as jupyter extensions.</p>
+<p>In particular, you will need to run the following two commands::</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">jupyter</span> <span class="n">nbextension</span> <span class="n">enable</span> <span class="o">--</span><span class="n">py</span> <span class="n">widgetsnbextension</span>
+<span class="n">jupyter</span> <span class="n">nbextension</span> <span class="n">enable</span> <span class="o">--</span><span class="n">py</span> <span class="o">--</span><span class="n">sys</span><span class="o">-</span><span class="n">prefix</span> <span class="n">ipyvolume</span>
+</pre></div>
+</div>
+<p>This enables widgets in your jupyter notebook application, and also enables ipyvolume (which is used to display surface widgets). It’s recommended to run these two commands if you’re having the issue that rather than displaying a widget, your code produces text saying <code class="docutils literal"><span class="pre">A</span> <span class="pre">Jupyter</span> <span class="pre">widget.</span></code></p>
+<p>It should be noted that at the moment, this doesn’t work in jupyterlab, as widget support in jupyterlab is at very early stages.</p>
 </div>
 <div class="section" id="development-installation">
 <h2>Development installation<a class="headerlink" href="#development-installation" title="Permalink to this headline">¶</a></h2>
-<p>As always with pip packages, you can install a &#8220;development&#8221; version of this package by cloning the git repository and installing it via <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">/path/to/package</span></code>.</p>
+<p>As always with pip packages, you can install a “development” version of this package by cloning the git repository and installing it via::</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">package</span>
+</pre></div>
+</div>
+<p>This means you can make changes in your code locally and they will affect your code straight away. To make this even easier, you can add the following two lines to the top of your notebook, which ensure packages are re-loaded every time you run code (so you don’t have to restart your jupyter kernel each time)::</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -169,7 +187,7 @@
     </p>
     <p>
         &copy; Copyright 2017, Jan Freyberg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>
