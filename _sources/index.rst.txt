@@ -2,7 +2,7 @@
 
 
 Make your neuroimaging plots interactive.
-==================
+=========================================
 
 ``niwidgets`` is a package that provides easy and general wrappers to display interactive widgets that visualise standard-format neuroimaging data, using new functions and standard functions from other libraries.
 
@@ -10,10 +10,10 @@ Make your neuroimaging plots interactive.
 
 .. ipywidgets-display::
 
-    from niwidgets import NiftiWidget, exampledata
+    from niwidgets import SurfaceWidget, exampledata
 
-    my_widget = NiftiWidget(exampledata.examplet1)
-    my_widget.nifti_plotter()
+    my_widget = SurfaceWidget(exampledata.examplesurface)
+    my_widget.surface_plotter()
 
 .. image:: img/example.gif
 
