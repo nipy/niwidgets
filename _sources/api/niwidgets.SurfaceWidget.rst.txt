@@ -1,5 +1,5 @@
 niwidgets.SurfaceWidget
-============
+=======================
 
 
 .. currentmodule:: niwidgets
