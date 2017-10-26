@@ -3,8 +3,7 @@ import nibabel as nib
 import numpy as np
 from ipywidgets import interact, fixed, widgets
 import os
-import ipyvolume.pylab as p3
-
+import ipyvolume as ipv
 
 def length(x):
     """Returns the sum of euclidean distances between neighboring points"""
@@ -87,11 +86,37 @@ class StreamlineWidget:
         if 'percentile' in kwargs:
             perc = kwargs['percentile']
 
-        p3.clear()
-        fig = p3.figure(width=width, height=height)
+        ipv.clear()
+        fig = ipv.figure(width=width, height=height)
         self.state['fig'] = fig
 
+        x, y, z = np.concatenate(self.lines2use).T
+        # will contain indices to the verties, [0, 1, 1, 2, 2, 3, 3, 4, 4, 5...]
+        indices = np.zeros(np.sum((len(line)-1)*2 for line in sl.streamlines), dtype=np.uint32)
+        colors = np.zeros((len(x), 3), dtype=np.float32)
+
+        vertex_offset = 0
+        line_offset = 0
+        # so basically of we have a line of 4 vertices, we need to add the indices:
+        #  offset + [0, 1, 1, 2, 2, 3]
+        # so we have approx 2x the number of indices compared to vertices
+        for line in self.lines2use:
+            line_length = len(line)
+            # repeat all but the start and end vertex
+            line_indices = np.repeat(np.arange(vertex_offset, vertex_offset+line_length, dtype=indices.dtype)
+                                                      ,2)[1:-1]
+            indices[line_offset:line_offset+line_length*2-2] = line_indices
+            colors[vertex_offset:vertex_offset+line_length] = color(line)
+            line_offset += line_length*2-2
+            vertex_offset += line_length
+
         with fig.hold_sync():
+            if 'grayscale' in kwargs and kwargs['grayscale']:
+                mesh = ipv.Mesh(x=x, y=y, z=z, lines=indices, color=[0.5, 0.5, 0.5])
+            else:
+                mesh = ipv.Mesh(x=x, y=y, z=z, lines=indices, color=colors)
+
+
             if 'style' not in kwargs:
                 fig.style = {'axes': {'color': 'black',
                                       'label': {'color': 'black'},
@@ -102,16 +127,10 @@ class StreamlineWidget:
             else:
                 fig.style = kwargs['style']
             fig.camera_fov = 1
+            fig.meshes = list(fig.meshes) + [mesh]
+            ipv.pylab._grow_limits(x, y, z)  # may chance in the future.. ?
 
-            fig.xlim = tuple(sl.header['dimensions'].max() * np.array([0, 1]))
-            fig.ylim = tuple(sl.header['dimensions'].max() * np.array([0, 1]))
-            fig.zlim = tuple(sl.header['dimensions'].max() * np.array([0, 1]))
-            for idx, line in enumerate(self.lines2use):
-                if 'grayscale' in kwargs and kwargs['grayscale']:
-                    p3.plot(*line.T, color=[0.5, 0.5, 0.5], visible_lines=False)
-                else:
-                    p3.plot(*line.T, color=colors[idx], visible_lines=False)
-        p3.show()
+        ipv.show()
 
         interact(self._plot_lines, state=fixed(self.state),
                  threshold=widgets.FloatSlider(value=np.percentile(self.lengths,
@@ -131,12 +150,12 @@ class StreamlineWidget:
                                    state['indices'])
             state['indices'] = np.concatenate((state['indices'], indices)).astype(int)
             for idx in indices:
-                state['fig'].scatters[idx].visible_lines = True
+                state['fig'].meshes[idx].visible_lines = True
         else:
             indices = np.setdiff1d(state['indices'],
                                    np.where(self.lengths > threshold)[0].astype(int))
             for idx in indices:
-                state['fig'].scatters[idx].visible_lines = False
+                state['fig'].meshes[idx].visible_lines = False
             state['indices'] = np.setdiff1d(state['indices'], indices)
         state['threshold'] = threshold
 
