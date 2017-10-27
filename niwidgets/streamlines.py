@@ -92,23 +92,28 @@ class StreamlineWidget:
 
         x, y, z = np.concatenate(self.lines2use).T
         # will contain indices to the verties, [0, 1, 1, 2, 2, 3, 3, 4, 4, 5...]
-        indices = np.zeros(np.sum((len(line)-1)*2 for line in sl.streamlines), dtype=np.uint32)
+        indices = np.zeros(np.sum((len(line)-1) * 2 for
+                                  line in self.lines2use), dtype=np.uint32)
         colors = np.zeros((len(x), 3), dtype=np.float32)
 
         vertex_offset = 0
         line_offset = 0
+        self.color_index = np.zeros((len(self.lines2use), 2), dtype=np.uint)
         # so basically of we have a line of 4 vertices, we need to add the indices:
         #  offset + [0, 1, 1, 2, 2, 3]
         # so we have approx 2x the number of indices compared to vertices
-        for line in self.lines2use:
+        for idx, line in enumerate(self.lines2use):
             line_length = len(line)
             # repeat all but the start and end vertex
-            line_indices = np.repeat(np.arange(vertex_offset, vertex_offset+line_length, dtype=indices.dtype)
-                                                      ,2)[1:-1]
-            indices[line_offset:line_offset+line_length*2-2] = line_indices
-            colors[vertex_offset:vertex_offset+line_length] = color(line)
-            line_offset += line_length*2-2
+            line_indices = np.repeat(np.arange(vertex_offset,
+                                               vertex_offset + line_length,
+                                               dtype=indices.dtype), 2)[1:-1]
+            indices[line_offset:line_offset + line_length * 2 - 2] = line_indices
+            colors[vertex_offset:vertex_offset + line_length] = color(line)
+            self.color_index[idx, :] = [vertex_offset, line_length]
+            line_offset += line_length * 2 - 2
             vertex_offset += line_length
+        self.colors = colors
 
         with fig.hold_sync():
             if 'grayscale' in kwargs and kwargs['grayscale']:
@@ -126,12 +131,12 @@ class StreamlineWidget:
                              'box': {'visible': False}}
             else:
                 fig.style = kwargs['style']
-            fig.camera_fov = 1
             fig.meshes = list(fig.meshes) + [mesh]
             ipv.pylab._grow_limits(x, y, z)  # may chance in the future.. ?
-
+            fig.camera_fov = 1
         ipv.show()
 
+        print(len(self.state['fig'].meshes))
         interact(self._plot_lines, state=fixed(self.state),
                  threshold=widgets.FloatSlider(value=np.percentile(self.lengths,
                                                                    perc),
@@ -150,12 +155,16 @@ class StreamlineWidget:
                                    state['indices'])
             state['indices'] = np.concatenate((state['indices'], indices)).astype(int)
             for idx in indices:
-                state['fig'].meshes[idx].visible_lines = True
+                offset, line_length = self.color_index[idx, :]
+                state['fig'].meshes[0].color[offset:offset + line_length] = \
+                    self.colors[offset:offset + line_length]
         else:
             indices = np.setdiff1d(state['indices'],
                                    np.where(self.lengths > threshold)[0].astype(int))
             for idx in indices:
-                state['fig'].meshes[idx].visible_lines = False
+                offset, line_len = self.color_index[idx, :]
+                state['fig'].meshes[0].color[offset:offset + line_len] = \
+                    [1., 1., 1.]
             state['indices'] = np.setdiff1d(state['indices'], indices)
         state['threshold'] = threshold
 
