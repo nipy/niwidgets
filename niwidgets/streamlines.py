@@ -5,6 +5,7 @@ from ipywidgets import interact, fixed, widgets
 import os
 import ipyvolume as ipv
 
+
 def length(x):
     """Returns the sum of euclidean distances between neighboring points"""
     return np.sum(np.sqrt(np.sum((x[:-1, :] - x[1:, :]) *
@@ -41,7 +42,7 @@ class StreamlineWidget:
 
         self.filename = filename
 
-    def plot(self, skip=100, **kwargs):
+    def plot(self, skip=10, **kwargs):
         """
         This is the main method for this widget.
 
@@ -57,6 +58,10 @@ class StreamlineWidget:
             height : int
                     The height of the figure
         """
+
+        if skip is not None and skip < 1:
+            raise ValueError(('The value of skip has to be a positive integer ' 
+                              'or None'))
 
         self._default_plotter(skip=skip, **kwargs)
 
@@ -76,6 +81,7 @@ class StreamlineWidget:
 
         vertex_offset = 0
         line_offset = 0
+        line_pointers = []
         # so basically of we have a line of 4 vertices, we need to add the indices:
         #  offset + [0, 1, 1, 2, 2, 3]
         # so we have approx 2x the number of indices compared to vertices
@@ -86,10 +92,11 @@ class StreamlineWidget:
                                                vertex_offset + line_length,
                                                dtype=indices.dtype), 2)[1:-1]
             indices[line_offset:line_offset + line_length * 2 - 2] = line_indices
+            line_pointers.append([line_offset, line_length, line_indices])
             colors[vertex_offset:vertex_offset + line_length] = local_colors[idx]
             line_offset += line_length * 2 - 2
             vertex_offset += line_length
-        return x, y, z, indices, colors
+        return x, y, z, indices, colors, line_pointers
 
     def _default_plotter(self, skip=100, **kwargs):
         """
@@ -108,7 +115,7 @@ class StreamlineWidget:
         else:
             self.colors = np.zeros((len(self.lines2use), 3), dtype=np.float16)
             self.colors[:] = [0.5, 0.5, 0.5]
-        self.state = {'threshold': np.inf, 'indices': []}
+        self.state = {'threshold': 0, 'indices': []}
 
         width = 600
         height = 600
@@ -124,32 +131,30 @@ class StreamlineWidget:
         fig = ipv.figure(width=width, height=height)
         self.state['fig'] = fig
 
-        if 'style' not in kwargs:
-            fig.style = {'axes': {'color': 'black',
-                                  'label': {'color': 'black'},
-                                  'ticklabel': {'color': 'black'},
-                                  'visible': False},
-                         'background-color': 'white',
-                         'box': {'visible': False}}
-        else:
-            fig.style = kwargs['style']
-        '''
         with fig.hold_sync():
-            x, y, z, indices, colors = self._create_mesh()
-            if 'grayscale' in kwargs and kwargs['grayscale']:
-                mesh = ipv.Mesh(x=x, y=y, z=z, lines=indices, color=[0.5, 0.5, 0.5])
+            x, y, z, indices, colors, self.line_pointers = self._create_mesh()
+            limits = np.array([min([x.min(), y.min(), z.min()]),
+                               max([x.max(), y.max(), z.max()])])
+            mesh = ipv.Mesh(x=x, y=y, z=z, lines=indices, color=colors)
+            fig.meshes = [mesh]
+            if 'style' not in kwargs:
+                fig.style = {'axes': {'color': 'black',
+                                      'label': {'color': 'black'},
+                                      'ticklabel': {'color': 'black'},
+                                      'visible': False},
+                             'background-color': 'white',
+                             'box': {'visible': False}}
             else:
-                mesh = ipv.Mesh(x=x, y=y, z=z, lines=indices, color=colors)
-
-            fig.meshes = list(fig.meshes) + [mesh]
-        '''
+                fig.style = kwargs['style']
+            ipv.pylab._grow_limits(limits, limits, limits)
+            fig.camera_fov = 1
         ipv.show()
 
         interact(self._plot_lines, state=fixed(self.state),
                  threshold=widgets.FloatSlider(value=np.percentile(self.lengths,
                                                                    perc),
                                                min=self.lengths.min() - 1,
-                                               max=self.lengths.max() + 1,
+                                               max=self.lengths.max() - 1,
                                                continuous_update=False));
 
     def _plot_lines(self, state, threshold):
@@ -159,28 +164,30 @@ class StreamlineWidget:
         This function is called by _default_plotter
         """
         if threshold < state['threshold']:
-            indices = np.setdiff1d(np.where(self.lengths > threshold)[0],
-                                   state['indices'])
-            state['indices'] = np.concatenate((state['indices'], indices)).astype(int)
+            # when threshold is reduced, increase the number of lines
+            state['indices'] = np.where(self.lengths > threshold)[0]
+            with state['fig'].hold_sync():
+                mesh = state['fig'].meshes[0]
+                copy = mesh.lines.copy()
+                for idx in state['indices']:
+                    (line_offset, line_length,
+                     line_indices) = self.line_pointers[idx]
+                    copy[line_offset:line_offset + line_length * 2 - 2] = \
+                        line_indices
+                mesh.lines = copy
+                mesh.send_state('lines')
         else:
-            indices = np.setdiff1d(state['indices'],
-                                   np.where(self.lengths > threshold)[0].astype(int))
-            state['indices'] = np.setdiff1d(state['indices'], indices)
+            # when threshold is increased, decrease the number of lines
+            indices = np.where(self.lengths <= threshold)[0]
+            with state['fig'].hold_sync():
+                mesh = state['fig'].meshes[0]
+                copy = mesh.lines.copy()
+                for idx in indices:
+                    (line_offset, line_length,
+                     line_indices) = self.line_pointers[idx]
+                    copy[line_offset:line_offset + line_length * 2 - 2] = 0
+                mesh.lines = copy
+                mesh.send_state('lines')
+            state['indices'] = np.where(self.lengths > threshold)[0]
         state['threshold'] = threshold
-        with state['fig'].hold_sync():
-            fig = state['fig']
-            print(len(state['indices']))
-            x, y, z, indices, colors = self._create_mesh(indices2use=state['indices'])
-            print(len(x))
-            mesh = ipv.Mesh(x=x, y=y, z=z, lines=indices, color=colors)
-            '''
-            meshes = list(fig.meshes)
-            if meshes:
-                meshes.pop()
-                fig.meshes = meshes
-            '''
-            fig.meshes = [mesh]
-            ipv.pylab._grow_limits(y, y, y)  # may chance in the future.. ?
-            fig.camera_fov = 1
-            fig.meshes[0].send_state()
 
