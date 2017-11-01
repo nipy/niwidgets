@@ -96,7 +96,7 @@ class NiftiWidget:
         else:
             self._custom_plotter(plotting_func, **kwargs)
 
-    def _default_plotter(self, mask_background=True, **kwargs):
+    def _default_plotter(self, mask_background=False, **kwargs):
         """
         Plot three orthogonal views.
 
@@ -113,6 +113,8 @@ class NiftiWidget:
 
         # mask the background
         if mask_background:
+            # TODO: add the ability to pass 'mne' to use a default brain mask
+            # TODO: split this out into a different function
             if data_array.ndim == 3:
                 labels, n_labels = scipy.ndimage.measurements.label(
                                             (np.round(data_array) == 0))
