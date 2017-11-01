@@ -5,6 +5,7 @@ import numpy as np
 from ipywidgets import interact, fixed, IntSlider
 import inspect
 import scipy.ndimage
+import os
 
 # import pathlib & backwards compatibility
 try:
@@ -40,7 +41,9 @@ class NiftiWidget:
                     The path to your ``.nii`` file. Can be a string, or a
                     ``PosixPath`` from python3's pathlib.
         """
-        self.filename = Path(filename).resolve(strict=True)
+        self.filename = Path(filename).resolve()
+        if not os.path.isfile(self.filename):
+            raise OSError('File ' + self.filename.name + ' not found.')
 
         # load data in advance
         # this ensures once the widget is created that the file is of a format
