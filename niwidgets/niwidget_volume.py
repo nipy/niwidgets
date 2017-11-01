@@ -5,6 +5,7 @@ import numpy as np
 from ipywidgets import interact, fixed, IntSlider
 import inspect
 import scipy.ndimage
+import os
 
 # import pathlib & backwards compatibility
 try:
@@ -40,7 +41,9 @@ class NiftiWidget:
                     The path to your ``.nii`` file. Can be a string, or a
                     ``PosixPath`` from python3's pathlib.
         """
-        self.filename = Path(filename).resolve(strict=True)
+        self.filename = Path(filename).resolve()
+        if not os.path.isfile(self.filename):
+            raise OSError('File ' + self.filename.name + ' not found.')
 
         # load data in advance
         # this ensures once the widget is created that the file is of a format
@@ -93,7 +96,7 @@ class NiftiWidget:
         else:
             self._custom_plotter(plotting_func, **kwargs)
 
-    def _default_plotter(self, mask_background=True, **kwargs):
+    def _default_plotter(self, mask_background=False, **kwargs):
         """
         Plot three orthogonal views.
 
@@ -110,6 +113,8 @@ class NiftiWidget:
 
         # mask the background
         if mask_background:
+            # TODO: add the ability to pass 'mne' to use a default brain mask
+            # TODO: split this out into a different function
             if data_array.ndim == 3:
                 labels, n_labels = scipy.ndimage.measurements.label(
                                             (np.round(data_array) == 0))
