@@ -41,14 +41,18 @@ class NiftiWidget:
                     The path to your ``.nii`` file. Can be a string, or a
                     ``PosixPath`` from python3's pathlib.
         """
-        self.filename = Path(filename).resolve()
-        if not os.path.isfile(self.filename):
-            raise OSError('File ' + self.filename.name + ' not found.')
+        if hasattr(filename, 'get_data'):
+            self.data = filename
+        else:
+            filename = Path(filename).resolve()
+            if not os.path.isfile(filename):
+                raise OSError('File ' + filename.name + ' not found.')
 
-        # load data in advance
-        # this ensures once the widget is created that the file is of a format
-        # readable by nibabel
-        self.data = nib.load(str(self.filename))
+            # load data in advance
+            # this ensures once the widget is created that the file is of a format
+            # readable by nibabel
+            self.data = nib.load(str(filename))
+
         # initialise where the image handles will go
         self.image_handles = None
 
