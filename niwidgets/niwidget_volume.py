@@ -48,7 +48,7 @@ class NiftiWidget:
         # load data in advance
         # this ensures once the widget is created that the file is of a format
         # readable by nibabel
-        self.data = nib.load(str(self.filename))  # .dataobj.get_unscaled()
+        self.data = nib.load(str(self.filename))
         # initialise where the image handles will go
         self.image_handles = None
 
@@ -106,7 +106,7 @@ class NiftiWidget:
         plt.gcf().clear()
         plt.ioff()  # disable interactive mode
 
-        data_array = self.data.dataobj.get_unscaled()
+        data_array = self.data.get_data()
 
         if not ((data_array.ndim == 3) or (data_array.ndim == 4)):
             raise ValueError('Input image should be 3D or 4D')
