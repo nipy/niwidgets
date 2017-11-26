@@ -105,7 +105,6 @@ class NiftiWidget:
         Plot three orthogonal views.
 
         This is called by nifti_plotter, you shouldn't call it directly.
-
         """
         plt.gcf().clear()
         plt.ioff()  # disable interactive mode
@@ -193,7 +192,11 @@ class NiftiWidget:
             slice_obj[ii] = coords[ii]
 
             # update the image
-            imh.set_data(np.flipud(np.rot90(data[slice_obj], k=1)))
+            imh.set_data(
+                np.flipud(np.rot90(data[slice_obj], k=1))
+                if views[ii] != 'Sagittal' else
+                np.fliplr(np.flipud(np.rot90(data[slice_obj], k=1)))
+            )
 
             # draw guides to show selected coordinates
             guide_positions = [val for jj, val in enumerate(coords)
