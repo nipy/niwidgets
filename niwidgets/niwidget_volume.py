@@ -49,8 +49,8 @@ class NiftiWidget:
                 raise OSError('File ' + filename.name + ' not found.')
 
             # load data in advance
-            # this ensures once the widget is created that the file is of a format
-            # readable by nibabel
+            # this ensures once the widget is created that the file is of a
+            # format readable by nibabel
             self.data = nib.load(str(filename))
 
         # initialise where the image handles will go
@@ -124,13 +124,13 @@ class NiftiWidget:
                                             (np.round(data_array) == 0))
             else:  # 4D
                 labels, n_labels = scipy.ndimage.measurements.label(
-                                        (np.round(data_array).max(axis=3) == 0)
-                                        )
+                    (np.round(data_array).max(axis=3) == 0)
+                )
 
             mask_labels = [lab for lab in range(1, n_labels+1)
                            if (np.any(labels[[0, -1], :, :] == lab) |
-                           np.any(labels[:, [0, -1], :] == lab) |
-                           np.any(labels[:, :, [0, -1]] == lab))]
+                               np.any(labels[:, [0, -1], :] == lab) |
+                               np.any(labels[:, :, [0, -1]] == lab))]
 
             if data_array.ndim == 3:
                 data_array = np.ma.masked_where(
