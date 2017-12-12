@@ -10,7 +10,7 @@ pip install niwidgets
 ```
 Or, to get the most up-to-date version from github:
 ```
-pip install git+git://github.com/janfreyberg/niwidgets/
+pip install git+git://github.com/nipy/niwidgets/
 ```
 
 It requires nibabel and nilearn:
