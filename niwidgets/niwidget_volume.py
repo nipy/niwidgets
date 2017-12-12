@@ -5,7 +5,6 @@ import numpy as np
 from ipywidgets import interact, fixed, IntSlider
 import inspect
 import scipy.ndimage
-import os
 
 # import pathlib & backwards compatibility
 try:
@@ -45,7 +44,7 @@ class NiftiWidget:
             self.data = filename
         else:
             filename = Path(filename).resolve()
-            if not os.path.isfile(filename):
+            if not filename.is_file():
                 raise OSError('File ' + filename.name + ' not found.')
 
             # load data in advance
