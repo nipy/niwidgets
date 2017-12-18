@@ -44,7 +44,9 @@ class SurfaceWidget:
         self.meshfile = meshfile
         if isinstance(self.meshfile, (str, Path)):
             # enforce that file is Path object here & also that it exists
-            self.meshfile = Path(self.meshfile).resolve(strict=True)
+            self.meshfile = Path(self.meshfile).resolve()
+            if not os.path.isfile(self.meshfile):
+                raise OSError('File ' + self.meshfile.name + ' not found.')
         elif isinstance(self.meshfile, nb.gifti.gifti.GiftiImage):
             pass
         else:
@@ -60,7 +62,10 @@ class SurfaceWidget:
         # convert all overlay strings to a path object
         for i, f in enumerate(self.overlayfiles):
             if isinstance(f, (str, Path)):
-                self.overlayfiles[i] = Path(f).resolve(strict=True)
+                self.overlayfiles[i] = Path(f).resolve()
+                if not os.path.isfile(self.overlayfiles[i]):
+                    raise OSError('File ' + self.overlayfiles[i].name
+                                  + ' not found.')
             elif isinstance(f, nb.gifti.gifti.GiftiImage):
                 pass
             else:

@@ -40,12 +40,18 @@ class NiftiWidget:
                     The path to your ``.nii`` file. Can be a string, or a
                     ``PosixPath`` from python3's pathlib.
         """
-        self.filename = Path(filename).resolve(strict=True)
+        if hasattr(filename, 'get_data'):
+            self.data = filename
+        else:
+            filename = Path(filename).resolve()
+            if not filename.is_file():
+                raise OSError('File ' + filename.name + ' not found.')
 
-        # load data in advance
-        # this ensures once the widget is created that the file is of a format
-        # readable by nibabel
-        self.data = nib.load(str(self.filename))  # .dataobj.get_unscaled()
+            # load data in advance
+            # this ensures once the widget is created that the file is of a
+            # format readable by nibabel
+            self.data = nib.load(str(filename))
+
         # initialise where the image handles will go
         self.image_handles = None
 
@@ -93,35 +99,36 @@ class NiftiWidget:
         else:
             self._custom_plotter(plotting_func, **kwargs)
 
-    def _default_plotter(self, mask_background=True, **kwargs):
+    def _default_plotter(self, mask_background=False, **kwargs):
         """
         Plot three orthogonal views.
 
         This is called by nifti_plotter, you shouldn't call it directly.
-
         """
         plt.gcf().clear()
         plt.ioff()  # disable interactive mode
 
-        data_array = self.data.dataobj.get_unscaled()
+        data_array = self.data.get_data()
 
         if not ((data_array.ndim == 3) or (data_array.ndim == 4)):
             raise ValueError('Input image should be 3D or 4D')
 
         # mask the background
         if mask_background:
+            # TODO: add the ability to pass 'mne' to use a default brain mask
+            # TODO: split this out into a different function
             if data_array.ndim == 3:
                 labels, n_labels = scipy.ndimage.measurements.label(
                                             (np.round(data_array) == 0))
             else:  # 4D
                 labels, n_labels = scipy.ndimage.measurements.label(
-                                        (np.round(data_array).max(axis=3) == 0)
-                                        )
+                    (np.round(data_array).max(axis=3) == 0)
+                )
 
             mask_labels = [lab for lab in range(1, n_labels+1)
                            if (np.any(labels[[0, -1], :, :] == lab) |
-                           np.any(labels[:, [0, -1], :] == lab) |
-                           np.any(labels[:, :, [0, -1]] == lab))]
+                               np.any(labels[:, [0, -1], :] == lab) |
+                               np.any(labels[:, :, [0, -1]] == lab))]
 
             if data_array.ndim == 3:
                 data_array = np.ma.masked_where(
@@ -184,7 +191,11 @@ class NiftiWidget:
             slice_obj[ii] = coords[ii]
 
             # update the image
-            imh.set_data(np.flipud(np.rot90(data[slice_obj], k=1)))
+            imh.set_data(
+                np.flipud(np.rot90(data[slice_obj], k=1))
+                if views[ii] != 'Sagittal' else
+                np.fliplr(np.flipud(np.rot90(data[slice_obj], k=1)))
+            )
 
             # draw guides to show selected coordinates
             guide_positions = [val for jj, val in enumerate(coords)
