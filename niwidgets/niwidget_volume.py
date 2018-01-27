@@ -10,13 +10,13 @@ import scipy.ndimage
 try:
     # on >3 this ships by default
     from pathlib import Path
-except ModuleNotFoundError:
+except ImportError:
     # on 2.7 this should work
     try:
         from pathlib2 import Path
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError('On python 2.7, niwidgets requires '
-                                  'pathlib2 to be installed.')
+    except ImportError:
+        raise ImportError('On python 2.7, niwidgets requires '
+                          'pathlib2 to be installed.')
 
 
 class NiftiWidget:
@@ -43,7 +43,6 @@ class NiftiWidget:
         if hasattr(filename, 'get_data'):
             self.data = filename
         else:
-            filename = Path(filename).resolve()
             if not filename.is_file():
                 raise OSError('File ' + filename.name + ' not found.')
 
