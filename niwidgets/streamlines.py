@@ -21,35 +21,49 @@ def color(x):
 
 class StreamlineWidget:
     """
-    Turns mrtrix track or trackvis files into interactive plots using ipyvolume
+    Turns mrtrix track or trackvis files into interactive plots using ipyvolume.
+
+    Color for each line is rendered as a function of the endpoints of the
+    streamline. Currently, this resolves to red for left-right, green for
+    anterior-posterior, and blue for inferior-superior.
 
     Args
     ----
         filename : str
                 The path to your ``.trk`` file. Can be a string, or a
                 ``PosixPath`` from python3's pathlib.
+        streamlines : a nibabel streamline object
+                An streamlines attribute of an object loaded by
+                nibabel.streamlines.load
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename=None, streamlines=None):
 
-        if not os.path.isfile(filename):
-            # for Python3 should have FileNotFoundError here
-            raise IOError('file {} not found'.format(filename))
+        if filename:
+            if not os.path.isfile(filename):
+                # for Python3 should have FileNotFoundError here
+                raise IOError('file {} not found'.format(filename))
 
-        if not nib.streamlines.is_supported(filename):
-            raise ValueError(('File {0} is not a streamline file supported '
-                              'by nibabel').format(filename))
+            if not nib.streamlines.is_supported(filename):
+                raise ValueError(('File {0} is not a streamline file supported '
+                                  'by nibabel').format(filename))
 
-        self.filename = filename
+            # load data in advance
+            self.streamlines = nib.streamlines.load(filename).streamlines
+        elif streamlines:
+            self.streamlines = streamlines
+        else:
+            raise KeyError('One of filename or streamlines must be specified')
+        self.lines2use_ = None
 
-    def plot(self, skip=10, **kwargs):
+    def plot(self, display_fraction=0.1, **kwargs):
         """
         This is the main method for this widget.
 
         Args
         ----
-            skip : int
-                    The number of streamlines to skip
+            display_fraction : float
+                    The fraction of streamlines to show
             percentile : int
                     The initial number of streamlines to show using a percentile
                     of length distribution
@@ -59,18 +73,23 @@ class StreamlineWidget:
                     The height of the figure
         """
 
-        if skip is not None and skip < 1:
-            raise ValueError(('The value of skip has to be a positive integer ' 
-                              'or None'))
+        if display_fraction is not None and (display_fraction > 1 or
+                                             display_fraction <= 0):
+            raise ValueError('proportion_to_display is a float between 0 and 1 ' 
+                             '(0 excluded) or None')
 
-        self._default_plotter(skip=skip, **kwargs)
+        N = len(self.streamlines)
+        num_streamlines = int(display_fraction * N)
+        indices = np.random.permutation(N)[:num_streamlines]
+        self.lines2use_ = self.streamlines[indices]
+        self._default_plotter(**kwargs)
 
     def _create_mesh(self, indices2use=None):
         if indices2use is None:
-            lines2use = self.lines2use
+            lines2use = self.lines2use_
             local_colors = self.colors
         else:
-            lines2use = self.lines2use[indices2use]
+            lines2use = self.lines2use_[indices2use]
             local_colors = self.colors[indices2use]
         x, y, z = np.concatenate(lines2use).T
 
@@ -98,22 +117,18 @@ class StreamlineWidget:
             vertex_offset += line_length
         return x, y, z, indices, colors, line_pointers
 
-    def _default_plotter(self, skip=100, **kwargs):
+    def _default_plotter(self, **kwargs):
         """
         Basic plot function to be used if no custom function is specified.
 
         This is called by plot, you shouldn't call it directly.
         """
 
-        # load data in advance
-        sl = nib.streamlines.load(self.filename)
-
-        self.lines2use = sl.streamlines[::skip]
-        self.lengths = np.array([length(x) for x in self.lines2use])
+        self.lengths = np.array([length(x) for x in self.lines2use_])
         if not('grayscale' in kwargs and kwargs['grayscale']):
-            self.colors = np.array([color(x) for x in self.lines2use])
+            self.colors = np.array([color(x) for x in self.lines2use_])
         else:
-            self.colors = np.zeros((len(self.lines2use), 3), dtype=np.float16)
+            self.colors = np.zeros((len(self.lines2use_), 3), dtype=np.float16)
             self.colors[:] = [0.5, 0.5, 0.5]
         self.state = {'threshold': 0, 'indices': []}
 
