@@ -21,7 +21,7 @@ def color(x):
 
 class StreamlineWidget:
     """
-    Turns mrtrix track or trackvis files into interactive plots using ipyvolume.
+    Turns nibabel track files into interactive plots using ipyvolume.
 
     Color for each line is rendered as a function of the endpoints of the
     streamline. Currently, this resolves to red for left-right, green for
