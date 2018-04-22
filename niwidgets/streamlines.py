@@ -29,7 +29,7 @@ class StreamlineWidget:
 
     Args
     ----
-        filename : str
+        filename : str, pathlib.Path
                 The path to your ``.trk`` file. Can be a string, or a
                 ``PosixPath`` from python3's pathlib.
         streamlines : a nibabel streamline object
@@ -40,20 +40,21 @@ class StreamlineWidget:
     def __init__(self, filename=None, streamlines=None):
 
         if filename:
-            if not os.path.isfile(filename):
+            if not os.path.isfile(str(filename)):
                 # for Python3 should have FileNotFoundError here
                 raise IOError('file {} not found'.format(filename))
 
             if not nib.streamlines.is_supported(filename):
-                raise ValueError(('File {0} is not a streamline file supported '
-                                  'by nibabel').format(filename))
+                raise ValueError(('File {0} is not a streamline file supported'
+                                  ' by nibabel').format(filename))
 
             # load data in advance
             self.streamlines = nib.streamlines.load(filename).streamlines
         elif streamlines:
             self.streamlines = streamlines
         else:
-            raise KeyError('One of filename or streamlines must be specified')
+            raise ValueError('One of filename or streamlines must be specified'
+                             )
         self.lines2use_ = None
 
     def plot(self, display_fraction=0.1, **kwargs):
@@ -65,8 +66,8 @@ class StreamlineWidget:
             display_fraction : float
                     The fraction of streamlines to show
             percentile : int
-                    The initial number of streamlines to show using a percentile
-                    of length distribution
+                    The initial number of streamlines to show using a
+                    percentile of length distribution
             width : int
                     The width of the figure
             height : int
@@ -75,8 +76,8 @@ class StreamlineWidget:
 
         if display_fraction is not None and (display_fraction > 1 or
                                              display_fraction <= 0):
-            raise ValueError('proportion_to_display is a float between 0 and 1 ' 
-                             '(0 excluded) or None')
+            raise ValueError('proportion_to_display is a float between 0 and 1'
+                             ' (0 excluded) or None')
 
         N = len(self.streamlines)
         num_streamlines = int(display_fraction * N)
@@ -93,7 +94,7 @@ class StreamlineWidget:
             local_colors = self.colors[indices2use]
         x, y, z = np.concatenate(lines2use).T
 
-        # will contain indices to the verties, [0, 1, 1, 2, 2, 3, 3, 4, 4, 5...]
+        # will contain indices to the verties, [0, 1, 1, 2, 2, 3, 3, 4, 4, 5..]
         indices = np.zeros(np.sum((len(line) - 1) * 2 for
                                   line in lines2use), dtype=np.uint32)
         colors = np.zeros((len(x), 3), dtype=np.float32)
@@ -101,7 +102,7 @@ class StreamlineWidget:
         vertex_offset = 0
         line_offset = 0
         line_pointers = []
-        # so basically of we have a line of 4 vertices, we need to add the indices:
+        # if we have a line of 4 vertices, we need to add the indices:
         #  offset + [0, 1, 1, 2, 2, 3]
         # so we have approx 2x the number of indices compared to vertices
         for idx, line in enumerate(lines2use):
@@ -110,9 +111,11 @@ class StreamlineWidget:
             line_indices = np.repeat(np.arange(vertex_offset,
                                                vertex_offset + line_length,
                                                dtype=indices.dtype), 2)[1:-1]
-            indices[line_offset:line_offset + line_length * 2 - 2] = line_indices
+            indices[line_offset:
+                    line_offset + line_length * 2 - 2] = line_indices
             line_pointers.append([line_offset, line_length, line_indices])
-            colors[vertex_offset:vertex_offset + line_length] = local_colors[idx]
+            colors[vertex_offset:
+                   vertex_offset + line_length] = local_colors[idx]
             line_offset += line_length * 2 - 2
             vertex_offset += line_length
         return x, y, z, indices, colors, line_pointers
@@ -166,11 +169,11 @@ class StreamlineWidget:
         ipv.show()
 
         interact(self._plot_lines, state=fixed(self.state),
-                 threshold=widgets.FloatSlider(value=np.percentile(self.lengths,
-                                                                   perc),
-                                               min=self.lengths.min() - 1,
-                                               max=self.lengths.max() - 1,
-                                               continuous_update=False));
+                 threshold=widgets.FloatSlider(
+                     value=np.percentile(self.lengths, perc),
+                     min=self.lengths.min() - 1,
+                     max=self.lengths.max() - 1,
+                     continuous_update=False))
 
     def _plot_lines(self, state, threshold):
         """
@@ -205,4 +208,3 @@ class StreamlineWidget:
                 mesh.send_state('lines')
             state['indices'] = np.where(self.lengths > threshold)[0]
         state['threshold'] = threshold
-
