@@ -2,15 +2,22 @@
 from setuptools import setup
 # To use a consistent encoding
 from codecs import open
-from os import path
+import os.path
+from niwidgets.version import version
+
+here = os.path.dirname(os.path.abspath(__file__))
+
+version_ns = {}
+with open(os.path.join(here, 'niwidgets', 'version.py')) as f:
+    exec(f.read(), {}, version_ns)
+
+# version = version_ns['version']
 
 blurb = 'A package that provides ipywidgets for standard neuroimaging plotting'
-if path.isfile('README.md'):
-    readme = open('README.md', 'r').read()
-else:
-    readme = blurb
 
-version = '0.1.4'
+readme = (open('README.md', 'r').read()
+          if os.path.isfile('README.md')
+          else blurb)
 
 setup(
     name='niwidgets',
@@ -29,6 +36,7 @@ setup(
     # Include the template file
     package_data={
         '': ['data/*nii*',
+             'data/*.trk',
              'data/examples_surfaces/lh.*',
              'data/examples_surfaces/*.ctab']
     },
