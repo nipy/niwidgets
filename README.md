@@ -19,8 +19,10 @@ pip install nibabel nilearn
 ```
 
 Check out the examples using the code in this notebook here:
-https://github.com/janfreyberg/niwidgets/blob/master/visualisation_wrapper.ipynb
+https://github.com/nipy/niwidgets/blob/master/index.ipynb
 (you need to run the notebook on your local machine to use the interactive features).
+
+or using binder here: https://mybinder.org/v2/gh/nipy/niwidgets/master?filepath=index.ipynb
 
 ### Usage:
 
