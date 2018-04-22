@@ -12,7 +12,7 @@ niwidgets.SurfaceWidget
 
 .. rubric:: Methods
 
-These are the methods that are added by niwidgets. All methods, including the inherited ones, are at the end of the page.
+Surface widget methods:
 
 .. autoautosummary:: niwidgets.SurfaceWidget
     :methods:

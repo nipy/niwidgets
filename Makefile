@@ -32,6 +32,6 @@ gh-pages:
 			rm -rf $(SOURCEDIR) build
 			> .nojekyll
 			git add -A
-			git ci -m "Generated gh-pages for `git log master -1 --pretty=short --abbrev-commit`"
+			git commit -m "Generated gh-pages automatically."
 			git push origin gh-pages
 			git checkout master

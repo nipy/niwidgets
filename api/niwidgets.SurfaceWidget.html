@@ -21,14 +21,16 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/@jupyter-widgets/html-manager@^0.10.0/dist/embed.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@jupyter-widgets/html-manager@^0.11.0/dist/embed-amd.js"></script>
     <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="niwidgets.StreamlineWidget" href="niwidgets.StreamlineWidget.html" />
     <link rel="prev" title="niwidgets.NiftiWidget" href="niwidgets.NiftiWidget.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -97,6 +99,10 @@
     <a href="niwidgets.NiftiWidget.html" title="Previous Chapter: niwidgets.NiftiWidget"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; niwidgets.NiftiWidget</span>
     </a>
   </li>
+  <li>
+    <a href="niwidgets.StreamlineWidget.html" title="Next Chapter: niwidgets.StreamlineWidget"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">niwidgets.Str... &raquo;</span>
+    </a>
+  </li>
               
             
             
@@ -132,13 +138,13 @@
 <h1>niwidgets.SurfaceWidget<a class="headerlink" href="#niwidgets-surfacewidget" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="niwidgets.SurfaceWidget">
-<em class="property">class </em><code class="descclassname">niwidgets.</code><code class="descname">SurfaceWidget</code><span class="sig-paren">(</span><em>meshfile</em>, <em>overlayfiles=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niwidgets/niwidget_surface.html#SurfaceWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#niwidgets.SurfaceWidget" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">niwidgets.</code><code class="descname">SurfaceWidget</code><span class="sig-paren">(</span><em>meshfile</em>, <em>overlayfiles=()</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niwidgets/niwidget_surface.html#SurfaceWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#niwidgets.SurfaceWidget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interact with brain surfaces right in the notebook.</p>
 </dd></dl>
 
 <hr class="docutils" />
 <p class="rubric">Methods</p>
-<p>These are the methods that are added by niwidgets. All methods, including the inherited ones, are at the end of the page.</p>
+<p>Surface widget methods:</p>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -157,16 +163,13 @@
 <p class="rubric">Methods Details</p>
 <div class="method-div"><dl class="class">
 <dt>
-<em class="property">class </em><code class="descclassname">niwidgets.</code><code class="descname">SurfaceWidget</code><span class="sig-paren">(</span><em>meshfile</em>, <em>overlayfiles=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niwidgets/niwidget_surface.html#SurfaceWidget"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="descclassname">niwidgets.</code><code class="descname">SurfaceWidget</code><span class="sig-paren">(</span><em>meshfile</em>, <em>overlayfiles=()</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niwidgets/niwidget_surface.html#SurfaceWidget"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Interact with brain surfaces right in the notebook.</p>
 <dl class="method">
 <dt id="niwidgets.SurfaceWidget.surface_plotter">
 <code class="descname">surface_plotter</code><span class="sig-paren">(</span><em>colormap=None, figsize=array([600, 600]), figlims=array([[-100,  100],        [-100,  100],        [-100,  100]]), show_zeroes=True, **kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niwidgets/niwidget_surface.html#SurfaceWidget.surface_plotter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#niwidgets.SurfaceWidget.surface_plotter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visualise a surface mesh (with overlay) inside notebooks.</p>
-<p>Basic functionality:
-Read mesh and overlay data
-Setup the interactive widget
-Set defaults for plotting</p>
+<p>This method displays the surface widget.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -233,7 +236,7 @@ at vertices of no interest (e.g. medial wall)</li>
     </p>
     <p>
         &copy; Copyright 2017, Jan Freyberg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>

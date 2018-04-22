@@ -21,11 +21,12 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/@jupyter-widgets/html-manager@^0.10.0/dist/embed.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@jupyter-widgets/html-manager@^0.11.0/dist/embed-amd.js"></script>
     <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="../../_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -119,72 +120,81 @@
   <h1>Source code for niwidgets.niwidget_surface</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A widget for surface-warped neuroimaging data.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
 <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">from</span> <span class="nn">xml.parsers.expat</span> <span class="k">import</span> <span class="n">ExpatError</span>
+
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">display</span>
-<span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="k">import</span> <span class="n">interact</span><span class="p">,</span> <span class="n">fixed</span><span class="p">,</span> <span class="n">IntSlider</span>
-<span class="c1"># from ipyvolume import gcf</span>
+<span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="k">import</span> <span class="n">interact</span><span class="p">,</span> <span class="n">fixed</span><span class="p">,</span> <span class="n">Dropdown</span>
 <span class="kn">import</span> <span class="nn">ipyvolume.pylab</span> <span class="k">as</span> <span class="nn">p3</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="c1"># import pathlib &amp; backwards compatibility</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="c1"># on &gt;3 this ships by default</span>
-    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
-<span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="c1"># on 2.7 this should work</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">pathlib2</span> <span class="k">import</span> <span class="n">Path</span>
-    <span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">ModuleNotFoundError</span><span class="p">(</span><span class="s1">&#39;On python 2.7, niwidgets requires &#39;</span>
-                                  <span class="s1">&#39;pathlib2 to be installed.&#39;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">.colormaps</span> <span class="k">import</span> <span class="n">get_cmap_dropdown</span>
+
+
+<span class="k">def</span> <span class="nf">_check_file</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if file exists and if it&#39;s valid&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiImage</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">file</span>
+    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The argument meshfile needs to either be &#39;</span>
+                         <span class="s1">&#39;a nibabel Gifti image or an existing file, &#39;</span>
+                         <span class="s1">&#39;but &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; was provided.&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_get_name</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get a name for the supplied file / giftiimage&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiImage</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">get_filename</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">get_filename</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="SurfaceWidget"><a class="viewcode-back" href="../../api/niwidgets.SurfaceWidget.html#niwidgets.SurfaceWidget">[docs]</a><span class="k">class</span> <span class="nc">SurfaceWidget</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Interact with brain surfaces right in the notebook.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meshfile</span><span class="p">,</span> <span class="n">overlayfiles</span><span class="o">=</span><span class="p">[]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a surface widget.</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meshfile</span><span class="p">,</span> <span class="n">overlayfiles</span><span class="o">=</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;Create a surface widget.</span>
 
-<span class="sd">        meshfile: file containing the</span>
-<span class="sd">                  (1) 3D coordinates of each vertex (V x 3 array, where</span>
-<span class="sd">                  V=#vertices)</span>
-<span class="sd">                  (2) triangle specifications (T x 3 array, where T=#triangles)</span>
-<span class="sd">                  Can be a FreeSurfer (i.e., lh.pial) or .gii mesh file</span>
+<span class="sd">        This widget takes in surface data, in the form of gifti files or</span>
+<span class="sd">        freesurfer files, and displays them interactively.</span>
 
-<span class="sd">        overlayfiles: overlay file containing the scalar value at each vertex</span>
-<span class="sd">                      (V x 1)</span>
-<span class="sd">                      Can be a FreeSurfer .annot, .thickness, .curv, .sulc;</span>
-<span class="sd">                      or .gii</span>
+<span class="sd">        meshfile : str, Path, nb.gifti.gifti.GiftiImage</span>
+<span class="sd">            A file containing the the surface information. It can either be</span>
+<span class="sd">            a Freesurfer file (i.e. lh.pial) or a .gii mesh file. A loaded</span>
+<span class="sd">            GiftiImage (using nibabel) will also work.</span>
+
+<span class="sd">        overlayfiles : tuple, dict, str, nb.gifti.gifti.GiftiImage</span>
+<span class="sd">            Data you&#39;d like to overlay on the 3D mesh. This can be a tuple of</span>
+<span class="sd">            files, a dictionary (in which case the keys of the dict are used</span>
+<span class="sd">            as options in a dropdown menu), or a single file name / loaded</span>
+<span class="sd">            GiftiImage. Possible file formats: .annot, .thickness, .curv, .sulc</span>
+<span class="sd">            or .gii.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># check meshfile is a valid argument</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span> <span class="o">=</span> <span class="n">meshfile</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
-            <span class="c1"># enforce that file is Path object here &amp; also that it exists</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="p">,</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiImage</span><span class="p">):</span>
-            <span class="k">pass</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;meshfile needs to be either a path to a valid&#39;</span>
-                            <span class="o">+</span> <span class="s1">&#39; file or a nibabel GiftiImage.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span> <span class="o">=</span> <span class="n">_check_file</span><span class="p">(</span><span class="n">meshfile</span><span class="p">)</span>
 
-        <span class="c1"># ensure overlayfiles is a list</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">overlayfiles</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">overlayfiles</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># make sure overlayfiles is a dictionary</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">overlayfiles</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span> <span class="o">=</span> <span class="n">overlayfiles</span>
-
-        <span class="c1"># convert all overlay strings to a path object</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiImage</span><span class="p">):</span>
-                <span class="k">pass</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;meshfile needs to be either a path to a valid&#39;</span>
-                                <span class="o">+</span> <span class="s1">&#39; file or a nibabel GiftiImage.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">overlayfiles</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">_get_name</span><span class="p">(</span><span class="n">file</span><span class="p">):</span> <span class="n">_check_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">overlayfiles</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span> <span class="o">=</span> <span class="p">{</span><span class="n">_get_name</span><span class="p">(</span><span class="n">overlayfiles</span><span class="p">):</span>
+                                 <span class="n">_check_file</span><span class="p">(</span><span class="n">overlayfiles</span><span class="p">)}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -234,8 +244,9 @@
         <span class="c1"># overlays is a 2D matrix</span>
         <span class="c1"># with 2nd dimension corresponding to (time) frame</span>
         <span class="n">my_color</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">colormap</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">overlays</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">activation</span> <span class="o">=</span> <span class="n">overlays</span><span class="p">[:,</span> <span class="n">frame</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">overlays</span><span class="p">[</span><span class="n">frame</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># activation = overlays[:, frame]</span>
+            <span class="n">activation</span> <span class="o">=</span> <span class="n">overlays</span><span class="p">[</span><span class="n">frame</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">activation</span><span class="p">)</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">activation</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">colors</span> <span class="o">=</span> <span class="n">my_color</span><span class="p">((</span><span class="n">activation</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">activation</span><span class="p">))</span>
                                   <span class="o">/</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">activation</span><span class="p">)</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">activation</span><span class="p">)))</span>
@@ -259,9 +270,9 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        mask_keep: np.ndarray</span>
+<span class="sd">        mask_keep : np.ndarray</span>
 <span class="sd">            Boolean array of what to show.</span>
-<span class="sd">        mask_kill: np.ndarray</span>
+<span class="sd">        mask_kill : np.ndarray</span>
 <span class="sd">            Boolean array of what to hide.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -280,56 +291,46 @@
 <div class="viewcode-block" id="SurfaceWidget.surface_plotter"><a class="viewcode-back" href="../../api/niwidgets.SurfaceWidget.html#niwidgets.SurfaceWidget.surface_plotter">[docs]</a>    <span class="k">def</span> <span class="nf">surface_plotter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">600</span><span class="p">,</span> <span class="mi">600</span><span class="p">]),</span>
                         <span class="n">figlims</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="p">[[</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">]]),</span>
                         <span class="n">show_zeroes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Visualise a surface mesh (with overlay) inside notebooks.</span>
+        <span class="sd">&quot;&quot;&quot;Visualise a surface mesh (with overlay) inside notebooks.</span>
 
-<span class="sd">        Basic functionality:</span>
-<span class="sd">        Read mesh and overlay data</span>
-<span class="sd">        Setup the interactive widget</span>
-<span class="sd">        Set defaults for plotting</span>
+<span class="sd">        This method displays the surface widget.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        surface: str, gifti object</span>
+<span class="sd">        surface : str, gifti object</span>
 <span class="sd">            Path to surface file in gifti or FS surface format or an</span>
 <span class="sd">            already loaded gifti object of surface</span>
-<span class="sd">        overlay: str, gifti object</span>
+<span class="sd">        overlay : str, gifti object</span>
 <span class="sd">            Path to overlay file in gifti or FS annot or anatomical</span>
 <span class="sd">            (.curv,.sulc,.thickness) format or an already loaded</span>
 <span class="sd">            gifti object of overlay, default None</span>
-<span class="sd">        colormap: string</span>
+<span class="sd">        colormap : string</span>
 <span class="sd">            A matplotlib colormap, default summer</span>
-<span class="sd">        figsize: ndarray</span>
+<span class="sd">        figsize : ndarray</span>
 <span class="sd">            Size of the figure to display, default [600,600]</span>
-<span class="sd">        figlims: ndarray</span>
+<span class="sd">        figlims : ndarray</span>
 <span class="sd">            x,y and z limits of the axes, default</span>
 <span class="sd">            [[-100,100],[-100,100],[-100,100]]</span>
-<span class="sd">        show_zeroes: bool</span>
+<span class="sd">        show_zeroes : bool</span>
 <span class="sd">            Display vertices with intensity = 0, default True</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># set default colormap options &amp; add them to the kwargs</span>
-        <span class="k">if</span> <span class="n">colormap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;colormap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;viridis&#39;</span><span class="p">]</span> <span class="o">+</span> \
-                <span class="nb">sorted</span><span class="p">(</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">datad</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_r&quot;</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">colormap</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
-            <span class="c1"># fix cmap if only one given</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;colormap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span><span class="p">(</span><span class="n">colormap</span><span class="p">)</span>
-
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;colormap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_cmap_dropdown</span><span class="p">(</span><span class="n">colormap</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span><span class="p">(</span><span class="n">figsize</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;figlims&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span><span class="p">(</span><span class="n">figlims</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="c1"># if mesh has not been loaded before, load it</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;.gii&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.gii&#39;</span><span class="p">:</span>
                 <span class="c1"># load gifti file</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">vertex_spatial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="p">)</span>
+                    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span>
                     <span class="n">vertex_edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
-                    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">vertex_spatial</span><span class="o">.</span><span class="n">T</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Please provide a valid gifti file.&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">ExpatError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;The file </span><span class="si">{}</span><span class="s1"> could not be read. &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="p">)</span>
+                        <span class="o">+</span> <span class="s1">&#39;Please provide a valid gifti file.&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># load freesurfer file</span>
                 <span class="n">fsgeometry</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">read_geometry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="p">)</span>
@@ -338,49 +339,41 @@
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="p">,</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiImage</span><span class="p">):</span>
             <span class="c1"># if mesh has been loaded as a GiftiImage, format the data</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">vertex_spatial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
-                <span class="n">vertex_edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
-                <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">vertex_spatial</span><span class="o">.</span><span class="n">T</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Please provide a valid gifti file.&#39;</span><span class="p">)</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">vertex_edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshfile</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
 
+        <span class="n">overlays</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">overlays</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span><span class="p">)))</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">overlayfile</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span><span class="p">):</span>
 
-                <span class="n">filename</span><span class="p">,</span> <span class="n">file_extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">overlayfile</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">overlayfile</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
-                <span class="k">if</span> <span class="n">file_extension</span> <span class="ow">is</span> <span class="s1">&#39;.gii&#39;</span><span class="p">:</span>
-                    <span class="n">overlay</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">overlayfile</span><span class="p">)</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">overlays</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">overlay</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
-                    <span class="k">except</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Please provide a valid gifti file&#39;</span><span class="p">)</span>
-
-                <span class="k">elif</span> <span class="p">(</span><span class="n">file_extension</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;.annot&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)):</span>
-                    <span class="n">annot</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">read_annot</span><span class="p">(</span><span class="n">overlayfile</span><span class="p">)</span>
-                    <span class="n">overlays</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">annot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-                <span class="k">elif</span> <span class="p">(</span><span class="n">file_extension</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;.curv&#39;</span><span class="p">,</span> <span class="s1">&#39;.thickness&#39;</span><span class="p">,</span> <span class="s1">&#39;.sulc&#39;</span><span class="p">)):</span>
-                    <span class="n">overlays</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">read_morph_data</span><span class="p">(</span><span class="n">overlayfile</span><span class="p">)</span>
+                <span class="n">file_ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">overlayfile</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">overlayfile</span><span class="p">,</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiImage</span><span class="p">):</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">overlays</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">overlayfile</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
-                    <span class="k">except</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Please provide a valid gifti file&#39;</span><span class="p">)</span>
+                    <span class="n">overlays</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">overlayfile</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">overlayfile</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">show_zeroes</span><span class="p">:</span>
-                    <span class="k">pass</span>
-                    <span class="c1"># try:</span>
-                    <span class="c1">#     mkeep, mkill = self.zmask(surface, overlay)</span>
-                    <span class="c1"># except:</span>
-                    <span class="c1">#     raise ValueError(</span>
-                    <span class="c1">#         &#39;Overlay required for medial wall masking.&#39;</span>
-                    <span class="c1">#         )</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">overlays</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">file_ext</span> <span class="o">==</span> <span class="s1">&#39;.gii&#39;</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">overlay</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">overlayfile</span><span class="p">)</span>
+                            <span class="n">overlays</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">overlay</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+                        <span class="k">except</span> <span class="n">ExpatError</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                                <span class="s1">&#39;The file </span><span class="si">{}</span><span class="s1"> could not be read. &#39;</span>
+                                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">overlayfile</span><span class="p">)</span>
+                                <span class="o">+</span> <span class="s1">&#39;Please provide a valid gifti file.&#39;</span><span class="p">)</span>
+
+                    <span class="k">elif</span> <span class="p">(</span><span class="n">file_ext</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;.annot&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)):</span>
+                        <span class="n">annot</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">read_annot</span><span class="p">(</span><span class="n">overlayfile</span><span class="p">)</span>
+                        <span class="n">overlays</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">annot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                    <span class="k">elif</span> <span class="p">(</span><span class="n">file_ext</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;.curv&#39;</span><span class="p">,</span> <span class="s1">&#39;.thickness&#39;</span><span class="p">,</span> <span class="s1">&#39;.sulc&#39;</span><span class="p">)):</span>
+                        <span class="n">overlays</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">read_morph_data</span><span class="p">(</span>
+                            <span class="n">overlayfile</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">show_zeroes</span><span class="p">:</span>
+                        <span class="k">pass</span>
 
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;triangles&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span><span class="p">(</span><span class="n">vertex_edges</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -389,9 +382,13 @@
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;overlays&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span><span class="p">(</span><span class="n">overlays</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">frame</span> <span class="o">=</span> <span class="n">fixed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">fixed</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">frame</span> <span class="o">=</span> <span class="n">IntSlider</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">Dropdown</span><span class="p">(</span>
+                <span class="n">options</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                <span class="n">value</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlayfiles</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Overlay:&#39;</span>
+            <span class="p">)</span>
 
         <span class="n">interact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_surface</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">)</span></div></div>
@@ -409,7 +406,7 @@
     </p>
     <p>
         &copy; Copyright 2017, Jan Freyberg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>

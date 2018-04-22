@@ -1,7 +1,7 @@
 API
 ===
 
-The only class so far is the ``NiftiWidget`` class:
+There are three widget classes:
 
 .. currentmodule:: niwidgets
 
@@ -10,3 +10,4 @@ The only class so far is the ``NiftiWidget`` class:
 
     NiftiWidget
     SurfaceWidget
+    StreamlineWidget

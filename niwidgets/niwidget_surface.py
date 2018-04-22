@@ -1,71 +1,80 @@
 """A widget for surface-warped neuroimaging data."""
 from __future__ import print_function
+from collections import defaultdict
+import os
+
 import nibabel as nb
+from xml.parsers.expat import ExpatError
+
 import matplotlib.pyplot as plt
 import numpy as np
+
 from IPython.display import display
-from ipywidgets import interact, fixed, IntSlider
-# from ipyvolume import gcf
+from ipywidgets import interact, fixed, Dropdown
 import ipyvolume.pylab as p3
-import os
-# import pathlib & backwards compatibility
-try:
-    # on >3 this ships by default
-    from pathlib import Path
-except ModuleNotFoundError:
-    # on 2.7 this should work
-    try:
-        from pathlib2 import Path
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError('On python 2.7, niwidgets requires '
-                                  'pathlib2 to be installed.')
+
+from .colormaps import get_cmap_dropdown
+
+
+def _check_file(file):
+    """Check if file exists and if it's valid"""
+    if isinstance(file, nb.gifti.gifti.GiftiImage):
+        return file
+    elif os.path.isfile(str(file)):
+        return str(file)
+    else:
+        raise ValueError('The argument meshfile needs to either be '
+                         'a nibabel Gifti image or an existing file, '
+                         'but ' + str(file) + ' was provided.')
+
+
+def _get_name(file):
+    """Get a name for the supplied file / giftiimage"""
+    if isinstance(file, nb.gifti.gifti.GiftiImage):
+        if file.get_filename():
+            return os.path.basename(file.get_filename())
+        else:
+            return str(file)
+    elif os.path.isfile(str(file)):
+        return os.path.basename(str(file))
 
 
 class SurfaceWidget:
     """Interact with brain surfaces right in the notebook."""
 
-    def __init__(self, meshfile, overlayfiles=[]):
-        """
-        Create a surface widget.
+    def __init__(self, meshfile, overlayfiles=()):
+        """Create a surface widget.
 
-        meshfile: file containing the
-                  (1) 3D coordinates of each vertex (V x 3 array, where
-                  V=#vertices)
-                  (2) triangle specifications (T x 3 array, where T=#triangles)
-                  Can be a FreeSurfer (i.e., lh.pial) or .gii mesh file
+        This widget takes in surface data, in the form of gifti files or
+        freesurfer files, and displays them interactively.
 
-        overlayfiles: overlay file containing the scalar value at each vertex
-                      (V x 1)
-                      Can be a FreeSurfer .annot, .thickness, .curv, .sulc;
-                      or .gii
+        meshfile : str, Path, nb.gifti.gifti.GiftiImage
+            A file containing the the surface information. It can either be
+            a Freesurfer file (i.e. lh.pial) or a .gii mesh file. A loaded
+            GiftiImage (using nibabel) will also work.
+
+        overlayfiles : tuple, dict, str, nb.gifti.gifti.GiftiImage
+            Data you'd like to overlay on the 3D mesh. This can be a tuple of
+            files, a dictionary (in which case the keys of the dict are used
+            as options in a dropdown menu), or a single file name / loaded
+            GiftiImage. Possible file formats: .annot, .thickness, .curv, .sulc
+            or .gii.
 
         """
         # check meshfile is a valid argument
-        self.meshfile = meshfile
-        if isinstance(self.meshfile, (str, Path)):
-            # enforce that file is Path object here & also that it exists
-            self.meshfile = Path(self.meshfile).resolve(strict=True)
-        elif isinstance(self.meshfile, nb.gifti.gifti.GiftiImage):
-            pass
-        else:
-            raise TypeError('meshfile needs to be either a path to a valid'
-                            + ' file or a nibabel GiftiImage.')
+        self.meshfile = _check_file(meshfile)
 
-        # ensure overlayfiles is a list
-        if not isinstance(overlayfiles, (list)):
-            self.overlayfiles = [overlayfiles]
-        else:
+        # make sure overlayfiles is a dictionary
+        if isinstance(overlayfiles, dict):
             self.overlayfiles = overlayfiles
-
-        # convert all overlay strings to a path object
-        for i, f in enumerate(self.overlayfiles):
-            if isinstance(f, (str, Path)):
-                self.overlayfiles[i] = Path(f).resolve(strict=True)
-            elif isinstance(f, nb.gifti.gifti.GiftiImage):
-                pass
-            else:
-                raise TypeError('meshfile needs to be either a path to a valid'
-                                + ' file or a nibabel GiftiImage.')
+        elif isinstance(overlayfiles, (list, tuple)):
+            self.overlayfiles = {
+                _get_name(file): _check_file(file)
+                for file in overlayfiles
+            }
+        else:
+            self.overlayfiles = {_get_name(overlayfiles):
+                                 _check_file(overlayfiles)}
 
         self.fig = None
 
@@ -115,8 +124,9 @@ class SurfaceWidget:
         # overlays is a 2D matrix
         # with 2nd dimension corresponding to (time) frame
         my_color = plt.cm.get_cmap(colormap)
-        if overlays is not None:
-            activation = overlays[:, frame]
+        if overlays[frame] is not None:
+            # activation = overlays[:, frame]
+            activation = overlays[frame]
             if max(activation) - min(activation) > 0:
                 colors = my_color((activation - min(activation))
                                   / (max(activation) - min(activation)))
@@ -140,9 +150,9 @@ class SurfaceWidget:
 
         Returns
         -------
-        mask_keep: np.ndarray
+        mask_keep : np.ndarray
             Boolean array of what to show.
-        mask_kill: np.ndarray
+        mask_kill : np.ndarray
             Boolean array of what to hide.
 
         """
@@ -161,56 +171,46 @@ class SurfaceWidget:
     def surface_plotter(self, colormap=None, figsize=np.array([600, 600]),
                         figlims=np.array(3 * [[-100, 100]]),
                         show_zeroes=True, **kwargs):
-        """
-        Visualise a surface mesh (with overlay) inside notebooks.
+        """Visualise a surface mesh (with overlay) inside notebooks.
 
-        Basic functionality:
-        Read mesh and overlay data
-        Setup the interactive widget
-        Set defaults for plotting
+        This method displays the surface widget.
 
         Parameters
         ----------
-        surface: str, gifti object
+        surface : str, gifti object
             Path to surface file in gifti or FS surface format or an
             already loaded gifti object of surface
-        overlay: str, gifti object
+        overlay : str, gifti object
             Path to overlay file in gifti or FS annot or anatomical
             (.curv,.sulc,.thickness) format or an already loaded
             gifti object of overlay, default None
-        colormap: string
+        colormap : string
             A matplotlib colormap, default summer
-        figsize: ndarray
+        figsize : ndarray
             Size of the figure to display, default [600,600]
-        figlims: ndarray
+        figlims : ndarray
             x,y and z limits of the axes, default
             [[-100,100],[-100,100],[-100,100]]
-        show_zeroes: bool
+        show_zeroes : bool
             Display vertices with intensity = 0, default True
 
         """
-        # set default colormap options & add them to the kwargs
-        if colormap is None:
-            kwargs['colormap'] = ['viridis'] + \
-                sorted(m for m in plt.cm.datad if not m.endswith("_r"))
-        elif type(colormap) is str:
-            # fix cmap if only one given
-            kwargs['colormap'] = fixed(colormap)
-
+        kwargs['colormap'] = get_cmap_dropdown(colormap)
         kwargs['figsize'] = fixed(figsize)
         kwargs['figlims'] = fixed(figlims)
 
-        if isinstance(self.meshfile, Path):
+        if isinstance(self.meshfile, str):
             # if mesh has not been loaded before, load it
-            if self.meshfile.suffix == '.gii':
+            if os.path.splitext(self.meshfile)[1].lower() == '.gii':
                 # load gifti file
-                self.meshfile = nb.load(self.meshfile)
                 try:
-                    vertex_spatial = self.meshfile.darrays[0].data
+                    self.meshfile = nb.load(self.meshfile)
+                    x, y, z = self.meshfile.darrays[0].data.T
                     vertex_edges = self.meshfile.darrays[1].data
-                    x, y, z = vertex_spatial.T
-                except:
-                    raise ValueError('Please provide a valid gifti file.')
+                except ExpatError:
+                    raise ValueError(
+                        'The file {} could not be read. '.format(self.meshfile)
+                        + 'Please provide a valid gifti file.')
             else:
                 # load freesurfer file
                 fsgeometry = nb.freesurfer.read_geometry(self.meshfile)
@@ -219,49 +219,41 @@ class SurfaceWidget:
 
         elif isinstance(self.meshfile, nb.gifti.gifti.GiftiImage):
             # if mesh has been loaded as a GiftiImage, format the data
-            try:
-                vertex_spatial = self.meshfile.darrays[0].data
-                vertex_edges = self.meshfile.darrays[1].data
-                x, y, z = vertex_spatial.T
-            except:
-                raise ValueError('Please provide a valid gifti file.')
+            x, y, z = self.meshfile.darrays[0].data.T
+            vertex_edges = self.meshfile.darrays[1].data
 
+        overlays = defaultdict(lambda: None)
         if len(self.overlayfiles) > 0:
-            overlays = np.zeros((len(x), len(self.overlayfiles)))
-            for i, overlayfile in enumerate(self.overlayfiles):
 
-                filename, file_extension = os.path.splitext(overlayfile)
+            for key, overlayfile in self.overlayfiles.items():
 
-                if file_extension is '.gii':
-                    overlay = nb.load(overlayfile)
-                    try:
-                        overlays[:, i] = overlay.darrays[0].data
-                    except:
-                        raise ValueError('Please provide a valid gifti file')
-
-                elif (file_extension in ('.annot', '')):
-                    annot = nb.freesurfer.read_annot(overlayfile)
-                    overlays[:, i] = annot[0]
-
-                elif (file_extension in ('.curv', '.thickness', '.sulc')):
-                    overlays[:, i] = nb.freesurfer.read_morph_data(overlayfile)
+                file_ext = os.path.splitext(overlayfile)[1].lower()
 
                 if isinstance(overlayfile, nb.gifti.gifti.GiftiImage):
-                    try:
-                        overlays[:, i] = overlayfile.darrays[0].data
-                    except:
-                        raise ValueError('Please provide a valid gifti file')
+                    overlays[key] = overlayfile.darrays[0].data
+                else:
+                    file_ext = os.path.splitext(overlayfile)[1].lower()
 
-                if not show_zeroes:
-                    pass
-                    # try:
-                    #     mkeep, mkill = self.zmask(surface, overlay)
-                    # except:
-                    #     raise ValueError(
-                    #         'Overlay required for medial wall masking.'
-                    #         )
-        else:
-            overlays = None
+                    if file_ext == '.gii':
+                        try:
+                            overlay = nb.load(overlayfile)
+                            overlays[key] = overlay.darrays[0].data
+                        except ExpatError:
+                            raise ValueError(
+                                'The file {} could not be read. '
+                                .format(overlayfile)
+                                + 'Please provide a valid gifti file.')
+
+                    elif (file_ext in ('.annot', '')):
+                        annot = nb.freesurfer.read_annot(overlayfile)
+                        overlays[key] = annot[0]
+
+                    elif (file_ext in ('.curv', '.thickness', '.sulc')):
+                        overlays[key] = nb.freesurfer.read_morph_data(
+                            overlayfile)
+
+                    if not show_zeroes:
+                        pass
 
         kwargs['triangles'] = fixed(vertex_edges)
         kwargs['x'] = fixed(x)
@@ -270,9 +262,13 @@ class SurfaceWidget:
         kwargs['overlays'] = fixed(overlays)
 
         if len(self.overlayfiles) < 2:
-            frame = fixed(0)
+            frame = fixed(None)
         else:
-            frame = IntSlider(value=0, min=0, max=len(self.overlayfiles) - 1)
+            frame = Dropdown(
+                options=list(self.overlayfiles.keys()),
+                value=list(self.overlayfiles.keys())[0],
+                description='Overlay:'
+            )
 
         interact(self._plot_surface, frame=frame, **kwargs)
         display(self.fig)
