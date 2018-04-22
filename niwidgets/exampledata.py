@@ -3,7 +3,7 @@
 try:
     # on >3 this ships by default
     from pathlib import Path
-except ModuleNotFoundError:
+except ImportError:
     # on 2.7 this should work
     try:
         from pathlib2 import Path
