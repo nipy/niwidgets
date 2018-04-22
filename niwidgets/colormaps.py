@@ -14,7 +14,7 @@ def get_cmap_dropdown(colormap):
             options=colormap, value=colormap[0], description='Colormap:'
         )
     elif isinstance(colormap, str):
-        return ipywidgets.fixed(str)
+        return ipywidgets.fixed(colormap)
     else:
         raise ValueError('The colormap must be either a valid string, a list, '
                          'or None.')

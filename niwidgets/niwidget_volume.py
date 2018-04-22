@@ -3,8 +3,11 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import numpy as np
 from ipywidgets import interact, fixed, IntSlider
+import ipywidgets as widgets
 import inspect
 import scipy.ndimage
+
+from .colormaps import get_cmap_dropdown
 
 # import pathlib & backwards compatibility
 try:
@@ -20,8 +23,7 @@ except ModuleNotFoundError:
 
 
 class NiftiWidget:
-    """
-    Turn .nii files into interactive plots using ipywidgets.
+    """Turn .nii files into interactive plots using ipywidgets.
 
     Args
     ----
@@ -84,14 +86,7 @@ class NiftiWidget:
             to nifti_plotter will be passed to that function.
 
         """
-        # set default colormap options & add them to the kwargs
-        if colormap is None:
-            kwargs['colormap'] = ['viridis'] + \
-                sorted(m for m in plt.cm.datad if not m.endswith("_r"))
-        elif type(colormap) is str:
-            # fix cmap if only one given
-            kwargs['colormap'] = fixed(colormap)
-
+        kwargs['colormap'] = get_cmap_dropdown(colormap)
         kwargs['figsize'] = fixed(figsize)
 
         if plotting_func is None:
@@ -100,8 +95,7 @@ class NiftiWidget:
             self._custom_plotter(plotting_func, **kwargs)
 
     def _default_plotter(self, mask_background=False, **kwargs):
-        """
-        Plot three orthogonal views.
+        """Plot three orthogonal views.
 
         This is called by nifti_plotter, you shouldn't call it directly.
         """
@@ -152,14 +146,14 @@ class NiftiWidget:
                 )
 
         if (data_array.ndim == 3) or (data_array.shape[3] == 1):
-            kwargs['t'] = fixed(0)  # time is fixed
-        else:  # 4D
+            kwargs['t'] = fixed(None)  # time is fixed
+        else:
             kwargs['t'] = IntSlider(
                 value=0, min=0, max=data_array.shape[3] - 1,
                 continuous_update=False
             )
 
-        interact(self._plot_slices, data=fixed(data_array), **kwargs)
+        widgets.interact(self._plot_slices, data=fixed(data_array), **kwargs)
 
         plt.close()  # clear plot
         plt.ion()  # return to interactive state
@@ -187,7 +181,7 @@ class NiftiWidget:
             slice_obj = 3 * [slice(None)]
 
             if data.ndim == 4:
-                slice_obj += [t]
+                slice_obj.append(t)
 
             slice_obj[ii] = coords[ii]
 
@@ -205,6 +199,7 @@ class NiftiWidget:
             imh.axes.lines[1].set_ydata(2*[guide_positions[1]])
 
             imh.set_cmap(colormap)
+
         if not fresh:
             return self.fig
 
