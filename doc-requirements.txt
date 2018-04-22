@@ -1,4 +1,3 @@
 sphinx_bootstrap_theme
 nbsphinx
 jupyter_sphinx
-

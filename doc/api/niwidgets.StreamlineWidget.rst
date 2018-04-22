@@ -1,20 +1,20 @@
-niwidgets.SurfaceWidget
-=======================
+niwidgets.StreamlineWidget
+==========================
 
 
 .. currentmodule:: niwidgets
 
 
-.. autoclass:: SurfaceWidget
+.. autoclass:: StreamlineWidget
 
 
 -----
 
 .. rubric:: Methods
 
-Surface widget methods:
+Streamline widget methods:
 
-.. autoautosummary:: niwidgets.SurfaceWidget
+.. autoautosummary:: niwidgets.StreamlineWidget
     :methods:
 
 
@@ -27,7 +27,7 @@ Surface widget methods:
 
       <div class="method-div">
 
-.. autoclass:: SurfaceWidget
+.. autoclass:: StreamlineWidget
     :members:
 
 .. raw:: html
