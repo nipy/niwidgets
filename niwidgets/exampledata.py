@@ -24,9 +24,10 @@ examplet1 = root_dir / 'T1.nii.gz'
 surface_dir = root_dir / 'example_surfaces'
 
 examplesurface = surface_dir / 'lh.inflated'
-exampleoverlays = [
-    surface_dir / f
-    for f in ('lh.area', 'lh.curv', 'lh.thickness', 'lh.aparc.annot')
-]
+exampleoverlays = {
+    key: surface_dir / f
+    for key, f in zip(['Area', 'Curvature', 'Thickness', 'Annotation'],
+                      ('lh.area', 'lh.curv', 'lh.thickness', 'lh.aparc.annot'))
+}
 
 streamlines = root_dir / 'streamlines.trk'
