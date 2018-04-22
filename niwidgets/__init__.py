@@ -9,3 +9,4 @@ from .exampledata import exampleatlas, examplezmap, examplet1  # noqa
 # import widget classes.
 from .niwidget_volume import NiftiWidget  # noqa
 from .niwidget_surface import SurfaceWidget  # noqa
+from .streamlines import StreamlineWidget

@@ -25,3 +25,5 @@ exampleoverlays = [
     surface_dir / f
     for f in ('lh.area', 'lh.curv', 'lh.thickness', 'lh.aparc.annot')
 ]
+
+streamlines = root_dir / 'streamlines.trk'
