@@ -171,7 +171,8 @@ class NiftiWidget:
 
         This function is called by _default_plotter
         """
-        if self.image_handles is None:
+        fresh = self.image_handles is None
+        if fresh:
             self._init_figure(data, colormap, figsize)
 
         coords = [x, y, z]
@@ -204,8 +205,8 @@ class NiftiWidget:
             imh.axes.lines[1].set_ydata(2*[guide_positions[1]])
 
             imh.set_cmap(colormap)
-
-        return self.fig
+        if not fresh:
+            return self.fig
 
     def _init_figure(self, data, colormap, figsize):
         # init an empty list
