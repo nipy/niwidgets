@@ -1,4 +1,7 @@
 """Example files for use with niwidgets."""
+__all__ = ['exampleatlas', 'examplezmap', 'examplet1',
+           'examplesurface', 'exampleoverlays', 'streamlines']
+
 # import pathlib & backwards compatibility
 try:
     # on >3 this ships by default
