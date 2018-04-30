@@ -9,17 +9,7 @@ import scipy.ndimage
 
 from .colormaps import get_cmap_dropdown
 
-# import pathlib & backwards compatibility
-try:
-    # on >3 this ships by default
-    from pathlib import Path
-except ModuleNotFoundError:
-    # on 2.7 this should work
-    try:
-        from pathlib2 import Path
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError('On python 2.7, niwidgets requires '
-                                  'pathlib2 to be installed.')
+import os.path
 
 
 class NiftiWidget:
@@ -45,9 +35,9 @@ class NiftiWidget:
         if hasattr(filename, 'get_data'):
             self.data = filename
         else:
-            filename = Path(filename).resolve()
-            if not filename.is_file():
-                raise OSError('File ' + filename.name + ' not found.')
+            filename = str(filename)
+            if not os.path.isfile(filename):
+                raise OSError('File ' + filename + ' not found.')
 
             # load data in advance
             # this ensures once the widget is created that the file is of a
@@ -288,3 +278,44 @@ class NiftiWidget:
         # Actually plot the image
         self.plotting_func(data, figure=fig, **kwargs)
         plt.show()
+
+
+class VolumeWidget:
+    """Turn .nii files into interactive plots using ipywidgets.
+
+    Args
+    ----
+        filename : str
+                The path to your ``.nii`` file. Can be a string, or a
+                ``PosixPath`` from python3's pathlib.
+    """
+
+    def __init__(self, filename):
+        """
+        Turn .nii files into interactive plots using ipywidgets.
+
+        Args
+        ----
+            filename : str
+                    The path to your ``.nii`` file. Can be a string, or a
+                    ``PosixPath`` from python3's pathlib.
+        """
+        if hasattr(filename, 'get_data'):
+            self.data = filename
+        else:
+            filename = str(filename)
+            if not os.path.isfile(filename):
+                raise OSError('File ' + filename + ' not found.')
+
+            # load data in advance
+            # this ensures once the widget is created that the file is of a
+            # format readable by nibabel
+            self.data = nib.load(str(filename))
+
+        # initialise where the image handles will go
+        self.image_handles = None
+
+        # initialise the control components of this widget
+
+    def plot():
+        pass

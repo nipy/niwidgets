@@ -2,32 +2,22 @@
 __all__ = ['exampleatlas', 'examplezmap', 'examplet1',
            'examplesurface', 'exampleoverlays', 'streamlines']
 
-# import pathlib & backwards compatibility
-try:
-    # on >3 this ships by default
-    from pathlib import Path
-except ModuleNotFoundError:
-    # on 2.7 this should work
-    try:
-        from pathlib2 import Path
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError('On python 2.7, niwidgets requires '
-                                  'pathlib2 to be installed.')
+import os.path
 
+root_dir = os.path.join(os.path.dirname(__file__), 'data')
 
-root_dir = Path(__file__).parent / 'data'
+exampleatlas = os.path.join(root_dir, 'cc400_roi_atlas.nii')
+examplezmap = os.path.join(root_dir, 'cognitive control_pFgA_z.nii.gz')
+examplet1 = os.path.join(root_dir, 'T1.nii.gz')
 
-exampleatlas = root_dir / 'cc400_roi_atlas.nii'
-examplezmap = root_dir / 'cognitive control_pFgA_z.nii.gz'
-examplet1 = root_dir / 'T1.nii.gz'
+surface_dir = os.path.join(root_dir, 'example_surfaces')
 
-surface_dir = root_dir / 'example_surfaces'
+examplesurface = os.path.join(surface_dir, 'lh.inflated')
 
-examplesurface = surface_dir / 'lh.inflated'
 exampleoverlays = {
-    key: surface_dir / f
+    key: os.path.join(surface_dir, f)
     for key, f in zip(['Area', 'Curvature', 'Thickness', 'Annotation'],
                       ('lh.area', 'lh.curv', 'lh.thickness', 'lh.aparc.annot'))
 }
 
-streamlines = root_dir / 'streamlines.trk'
+streamlines = os.path.join(root_dir, 'streamlines.trk')

@@ -24,6 +24,7 @@ setup(
     version=version,
     description=blurb,
     long_description=readme,
+    long_description_content_type="text/markdown",
     url='https://github.com/nipy/niwidgets',
     download_url='https://github.com/nipy/niwidgets/archive/' +
         version + '.tar.gz',

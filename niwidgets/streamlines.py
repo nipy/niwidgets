@@ -40,16 +40,17 @@ class StreamlineWidget:
     def __init__(self, filename=None, streamlines=None):
 
         if filename:
-            if not os.path.isfile(str(filename)):
+            filename = str(filename)
+            if not os.path.isfile(filename):
                 # for Python3 should have FileNotFoundError here
                 raise IOError('file {} not found'.format(filename))
 
-            if not nib.streamlines.is_supported(str(filename)):
+            if not nib.streamlines.is_supported(filename):
                 raise ValueError(('File {0} is not a streamline file supported'
                                   ' by nibabel').format(filename))
 
             # load data in advance
-            self.streamlines = nib.streamlines.load(str(filename)).streamlines
+            self.streamlines = nib.streamlines.load(filename).streamlines
         elif streamlines:
             self.streamlines = streamlines
         else:
