@@ -3,15 +3,14 @@ from setuptools import setup
 # To use a consistent encoding
 from codecs import open
 import os.path
-from niwidgets.version import version
 
 here = os.path.dirname(os.path.abspath(__file__))
+ver_file = os.path.join(here, 'niwidgets', 'version.py')
 
-version_ns = {}
-with open(os.path.join(here, 'niwidgets', 'version.py')) as f:
-    exec(f.read(), {}, version_ns)
+with open(ver_file) as f:
+    exec(f.read(), globals(), locals())
 
-# version = version_ns['version']
+version = locals()['__version__']
 
 blurb = 'A package that provides ipywidgets for standard neuroimaging plotting'
 
