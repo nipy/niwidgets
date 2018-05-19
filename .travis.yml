@@ -4,5 +4,5 @@ python:
   - "3.6"
 script:
   - pip install flake8
-  - flake8
+  - flake8 niwidgets
   - python setup.py test
