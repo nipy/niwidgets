@@ -33,15 +33,31 @@ https://mybinder.org/v2/gh/nipy/niwidgets/master?filepath=index.ipynb
 
 ### Usage:
 
-So far, the widgets support plotting of nifti files, either in `nii` or `nii.gz`
-format. You initialise a widget class like this:
+There are currently three supported widgets:
+
+1. Volume widgets. This widget is primarily designed to mimic existing tools
+such as <add tool here>, but it also allows you to wrap plots from the `nilearn`
+plotting library to make them interactive.
+
+2. Surface widgets. This widget takes freesurfer-generated volume files and
+turns them into widgets using the `ipyvolume` library. It allows you to add
+different overlays for the surface files.
+
+3. Streamline widgets. This widget accepts `.trk` files and displays the tracts
+using `ipyvolume`.
+
+To see how to use these widgets, please check the
+[documentation](nipy.org/niwidgets).
+
+As an example of how you might generate a Volume widget:
 
 ```
-from niwidgets import NiftiWidget my_widget =
-NiftiWidget('./path/to/file.nii')
+from niwidgets import NiftiWidget
+
+my_widget = NiftiWidget('./path/to/file.nii')
 ```
 
-You can then create a plot either with our default nifti plotter:
+You can then create a plot either with the default nifti plotter:
 
 ```
 my_widget.nifti_plotter()
