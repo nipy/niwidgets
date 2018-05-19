@@ -306,16 +306,21 @@ class VolumeWidget:
             filename = str(filename)
             if not os.path.isfile(filename):
                 raise OSError('File ' + filename + ' not found.')
-
-            # load data in advance
-            # this ensures once the widget is created that the file is of a
-            # format readable by nibabel
+            # load data to ensures that the file readable by nibabel
             self.data = nib.load(str(filename))
 
+        # set how many dimensions this file has
+        self.ndim = len(self.data.shape)
         # initialise where the image handles will go
         self.image_handles = None
 
         # initialise the control components of this widget
+        for i, dim in enumerate(['x', 'y', 'z', 't'][:self.ndim]):
+            self.sliders[dim] = widgets.IntSlider(
+                min=0, max=self.data.shape[i] - 1,
+                value=self.data.shape[i] // 2,
+                step=1
+            )
 
-    def plot():
+    def _plot_slices():
         pass
