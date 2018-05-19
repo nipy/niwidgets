@@ -6,10 +6,23 @@ functions and standard functions from other libraries. It looks like this:
 
 ![](https://thumbs.gfycat.com/ExcitableReflectingLcont-size_restricted.gif)
 
-Install via: ``` pip install niwidgets ``` Or, to get the most up-to-date
-version from github: ``` pip install git+git://github.com/nipy/niwidgets/ ```
+Install via:
 
-It requires nibabel and nilearn: ``` pip install nibabel nilearn ```
+```
+pip install niwidgets
+```
+
+Or, to get the most up-to-date development version from github:
+
+```
+pip install git+git://github.com/nipy/niwidgets/
+```
+
+It requires nibabel and nilearn:
+
+```
+pip install nibabel nilearn
+```
 
 Check out the examples using the code in this notebook here:
 https://github.com/nipy/niwidgets/blob/master/index.ipynb (you need to run the
