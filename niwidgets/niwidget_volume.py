@@ -1,15 +1,15 @@
 """Widgets that visualise volume images in .nii files."""
-import nibabel as nib
-import matplotlib.pyplot as plt
-import numpy as np
-from ipywidgets import interact, fixed, IntSlider
-import ipywidgets as widgets
 import inspect
+import os.path
+
+import ipywidgets as widgets
+import matplotlib.pyplot as plt
+import nibabel as nib
+import numpy as np
 import scipy.ndimage
+from ipywidgets import IntSlider, fixed, interact
 
 from .colormaps import get_cmap_dropdown
-
-import os.path
 
 
 class NiftiWidget:

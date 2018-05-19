@@ -1,9 +1,11 @@
 from __future__ import print_function
+
+import os
+
+import ipyvolume as ipv
 import nibabel as nib
 import numpy as np
-from ipywidgets import interact, fixed, widgets
-import os
-import ipyvolume as ipv
+from ipywidgets import fixed, interact, widgets
 
 
 def length(x):

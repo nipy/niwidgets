@@ -1,5 +1,5 @@
-from matplotlib import pyplot as plt
 import ipywidgets
+from matplotlib import pyplot as plt
 
 
 def get_cmap_dropdown(colormap):

@@ -1,17 +1,16 @@
 """A widget for surface-warped neuroimaging data."""
 from __future__ import print_function
-from collections import defaultdict
-import os
 
-import nibabel as nb
+import os
+from collections import defaultdict
 from xml.parsers.expat import ExpatError
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-from IPython.display import display
-from ipywidgets import interact, fixed, Dropdown
 import ipyvolume.pylab as p3
+import matplotlib.pyplot as plt
+import nibabel as nb
+import numpy as np
+from IPython.display import display
+from ipywidgets import Dropdown, fixed, interact
 
 from .colormaps import get_cmap_dropdown
 
