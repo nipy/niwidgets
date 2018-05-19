@@ -5,4 +5,4 @@ python:
 script:
   - pip install flake8
   - flake8
-  - python setup.py
+  - python setup.py test
