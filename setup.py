@@ -34,7 +34,7 @@ setup(
     packages=['niwidgets'],
     keywords=['widgets', 'neuroimaging'],
     install_requires=['ipywidgets', 'nilearn', 'nibabel', 'ipyvolume',
-                      'matplotlib'],
+                      'matplotlib', 'numpy'],
     # Include the template file
     package_data={
         '': ['data/*nii*',
@@ -44,5 +44,8 @@ setup(
     },
     tests_require=[
         'pytest'
+    ],
+    setup_requires=[
+        'pytest-runner'
     ]
 )
