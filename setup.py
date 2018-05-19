@@ -33,7 +33,8 @@ setup(
     author_email='jan.freyberg@gmail.com',
     packages=['niwidgets'],
     keywords=['widgets', 'neuroimaging'],
-    install_requires=['ipywidgets', 'nilearn', 'nibabel', 'ipyvolume'],
+    install_requires=['ipywidgets', 'nilearn', 'nibabel', 'ipyvolume',
+                      'matplotlib'],
     # Include the template file
     package_data={
         '': ['data/*nii*',
