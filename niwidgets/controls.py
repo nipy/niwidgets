@@ -4,7 +4,7 @@ import traitlets
 
 class PlaySlider(widgets.HBox):
     """
-    A combined play / slider widget.
+    A combined Play / IntSlider widget.
     """
 
     max = traitlets.Integer(100)
