@@ -1,8 +1,9 @@
 """Installer."""
-from setuptools import setup
+import os.path
 # To use a consistent encoding
 from codecs import open
-import os.path
+
+from setuptools import setup
 
 here = os.path.dirname(os.path.abspath(__file__))
 ver_file = os.path.join(here, 'niwidgets', 'version.py')
@@ -32,7 +33,8 @@ setup(
     author_email='jan.freyberg@gmail.com',
     packages=['niwidgets'],
     keywords=['widgets', 'neuroimaging'],
-    install_requires=['ipywidgets', 'nilearn', 'nibabel', 'ipyvolume'],
+    install_requires=['ipywidgets', 'nibabel', 'ipyvolume',
+                      'matplotlib', 'numpy', 'scipy'],
     # Include the template file
     package_data={
         '': ['data/*nii*',
@@ -40,4 +42,10 @@ setup(
              'data/examples_surfaces/lh.*',
              'data/examples_surfaces/*.ctab']
     },
+    tests_require=[
+        'pytest'
+    ],
+    setup_requires=[
+        'pytest-runner'
+    ]
 )
