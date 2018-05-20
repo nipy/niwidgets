@@ -303,7 +303,9 @@ class VolumeWidget(traitlets.HasTraits):
     guidelines = traitlets.Bool(True)
     orient_radiology = traitlets.Bool(True)
 
-    def __init__(self, filename, figsize=(5, 5), colormaps=None):
+    def __init__(self, filename, figsize=(5, 5), colormap=None,
+                 orient_radiology=None, guidelines=None,
+                 animation_speed=300):
         """
         Turn .nii files into interactive plots using ipywidgets.
 
@@ -315,8 +317,19 @@ class VolumeWidget(traitlets.HasTraits):
             figsize : tuple
                     The figure size for each individual view.
             colormaps : tuple, list
-                    A list of colormaps. By default, a selection of maps is
-                    used to populate the dropdown widget.
+                    A list of colormaps, or single colormap.
+                    If None, a selection of maps is used to populate the
+                    dropdown widget.
+            orient_radiology : bool
+                    Whether to display the images in the "radiological" style,
+                    i.e. with lef and right reversed. If None, a checkbox is
+                    offered.
+            guidelines : bool
+                    Whether to display guide lines. If None, a checkbox is
+                    offered.
+            animation_speed : int
+                    The speed used for the animation, in milliseconds between
+                    frames (the lower, the faster, up to a limit).
         """
 
         if hasattr(filename, 'get_data'):
@@ -340,30 +353,47 @@ class VolumeWidget(traitlets.HasTraits):
         for i, dim in enumerate(self.dims):
             maxval = self.data.shape[i] - 1
             self.controls[dim] = PlaySlider(
-                min=0, max=maxval, value=maxval // 2, interval=300,
+                min=0, max=maxval, value=maxval // 2, interval=animation_speed,
                 label=dim.upper(), continuous_update=False)
             widgets.link((self.controls[dim], 'value'),
                          (self, dim))
 
-        self.color_picker = get_cmap_dropdown(colormaps)
-        widgets.link((self.color_picker, 'value'), (self, 'colormap'))
-        self.color_reverser = widgets.Checkbox(description='Reverse colormap')
-        widgets.link((self.color_reverser, 'value'), (self, 'reverse_colors'))
+        if not isinstance(colormap, str):
+            self.color_picker = get_cmap_dropdown(colormap)
+            widgets.link((self.color_picker, 'value'), (self, 'colormap'))
+            self.color_reverser = widgets.Checkbox(
+                description='Reverse colormap', indent=True)
+            widgets.link((self.color_reverser, 'value'),
+                         (self, 'reverse_colors'))
+        else:
+            self.color_picker = widgets.HBox([])
+            self.color_reverser = widgets.HBox([])
+            self.colormap = colormap
 
-        self.guideline_picker = widgets.Checkbox(
-            value=True, description='Show guides', indent=False)
-        widgets.link((self.guideline_picker, 'value'), (self, 'guidelines'))
+        if guidelines is None:
+            self.guideline_picker = widgets.Checkbox(
+                value=True, description='Show guides', indent=False)
+            widgets.link((self.guideline_picker, 'value'),
+                         (self, 'guidelines'))
+        else:
+            self.guideline_picker = widgets.Box([])
+            self.guidelines = guidelines
 
-        self.orientation_switcher = widgets.Checkbox(
-            value=self.orient_radiology, indent=False,
-            description='Radiological Orientation')
-        widgets.link((self.orientation_switcher, 'value'),
-                     (self, 'orient_radiology'))
+        if orient_radiology is None:
+            self.orientation_switcher = widgets.Checkbox(
+                value=self.orient_radiology, indent=False,
+                description='Radiological Orientation')
+            widgets.link((self.orientation_switcher, 'value'),
+                         (self, 'orient_radiology'))
+        else:
+            self.orientation_switcher = widgets.Box([])
+            self.orient_radiology = orient_radiology
+
         self._update_orientation(True)
 
     @property
     def indices(self):
-        return [self.x, self.y, self.z, self.t]
+        return [self.x, self.y, self.z, self.t][:self.ndim]
 
     @traitlets.observe('x', 'y', 'z', 't', 'guidelines', 'orient_radiology')
     def _update_slices(self, change):
@@ -389,11 +419,9 @@ class VolumeWidget(traitlets.HasTraits):
 
             if self.guidelines:
                 # add "cross hair"
-                x, y = (idx if idim != 2 else self.data.shape[2] - idx
-                        for idim, idx in enumerate(self.indices[:3])
-                        if idim != iimage)
-                # if idim == 2 and 'z':
-                #     y = self.controls['z']
+                x_idx, y_idx = (i for i in range(3) if i != iimage)
+                x = self.indices[x_idx]
+                y = self.data.shape[y_idx] - self.indices[y_idx]
                 ax.lines = [ax.axvline(x=x, color='gray'),
                             ax.axhline(y=y, color='gray')]
             else:
@@ -478,10 +506,10 @@ class VolumeWidget(traitlets.HasTraits):
         self.layout = widgets.VBox([
             widgets.Box([self.controls[dim] for dim in self.dims],
                         layout={'flex_flow': 'row wrap'}),
-            widgets.HBox([self.color_picker, self.color_reverser,
-                          self.guideline_picker, self.orientation_switcher],
-                         # layout={'flex_flow': 'row wrap'}
-                         ),
+            widgets.HBox([self.color_picker]),
+            widgets.HBox([self.color_reverser, self.guideline_picker,
+                          self.orientation_switcher],
+                         layout={'flex_flow': 'row wrap'}),
             widgets.Box(self.displays, layout={'flex_flow': 'row wrap'})
         ])
         return self.layout
