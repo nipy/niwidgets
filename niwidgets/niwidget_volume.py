@@ -297,9 +297,13 @@ class VolumeWidget(traitlets.HasTraits):
     y = traitlets.Integer(0)
     z = traitlets.Integer(0)
     t = traitlets.Integer(0)
-    colormap = traitlets.Unicode('viridis')
+    colormap = traitlets.Unicode('summer')
+    reverse_colors = traitlets.Bool(False)
 
-    def __init__(self, filename, figsize=(5, 5)):
+    guidelines = traitlets.Bool(True)
+    orient_radiology = traitlets.Bool(True)
+
+    def __init__(self, filename, figsize=(5, 5), colormaps=None):
         """
         Turn .nii files into interactive plots using ipywidgets.
 
@@ -308,6 +312,11 @@ class VolumeWidget(traitlets.HasTraits):
             filename : str
                     The path to your ``.nii`` file. Can be a string, or a
                     ``PosixPath`` from python3's pathlib.
+            figsize : tuple
+                    The figure size for each individual view.
+            colormaps : tuple, list
+                    A list of colormaps. By default, a selection of maps is
+                    used to populate the dropdown widget.
         """
 
         if hasattr(filename, 'get_data'):
@@ -329,22 +338,34 @@ class VolumeWidget(traitlets.HasTraits):
         self.dims = ['x', 'y', 'z', 't'][:self.ndim]
         self.controls = {}
         for i, dim in enumerate(self.dims):
-
             maxval = self.data.shape[i] - 1
-
             self.controls[dim] = PlaySlider(
-                min=0, max=maxval, value=maxval // 2, inteval=500,
-                label=dim.upper(), continuous_update=False
-            )
-
+                min=0, max=maxval, value=maxval // 2, interval=300,
+                label=dim.upper(), continuous_update=False)
             widgets.link((self.controls[dim], 'value'),
                          (self, dim))
+
+        self.color_picker = get_cmap_dropdown(colormaps)
+        widgets.link((self.color_picker, 'value'), (self, 'colormap'))
+        self.color_reverser = widgets.Checkbox(description='Reverse colormap')
+        widgets.link((self.color_reverser, 'value'), (self, 'reverse_colors'))
+
+        self.guideline_picker = widgets.Checkbox(
+            value=True, description='Show guides', indent=False)
+        widgets.link((self.guideline_picker, 'value'), (self, 'guidelines'))
+
+        self.orientation_switcher = widgets.Checkbox(
+            value=self.orient_radiology, indent=False,
+            description='Radiological Orientation')
+        widgets.link((self.orientation_switcher, 'value'),
+                     (self, 'orient_radiology'))
+        self._update_orientation(True)
 
     @property
     def indices(self):
         return [self.x, self.y, self.z, self.t]
 
-    @traitlets.observe('x', 'y', 'z', 't')
+    @traitlets.observe('x', 'y', 'z', 't', 'guidelines', 'orient_radiology')
     def _update_slices(self, change):
         array = self.data.get_data()
 
@@ -353,29 +374,88 @@ class VolumeWidget(traitlets.HasTraits):
 
         for iimage, (disp, fig, ax, image) in enumerate(
                 zip(self.displays, self.figures, self.axes, self.images)):
+            image_data = (np.rot90(array[
+                tuple(slice(None) if iimage != idim
+                      else self.indices[idim]
+                      for idim in range(3))
+                + (self.t,)]))
             if image is not None:
-                image.set_data(
-                    np.fliplr(np.rot90(array[
-                        tuple(slice(None) if iimage != idim
-                              else self.indices[idim]
-                              for idim in range(3))
-                        + (self.t,)
-                    ]))
-                )
+                image.set_data(image_data)
             else:
                 self.images[iimage] = ax.imshow(
-                    np.fliplr(np.rot90(array[
-                        tuple(slice(None) if iimage != idim
-                              else self.indices[idim]
-                              for idim in range(3))
-                        + (self.t,)
-                    ])),
-                    cmap=self.colormap, vmin=self.data.get_data().min(),
-                    vmax=self.data.get_data().max()
-                )
-            with disp:
-                display.clear_output(wait=True)
-                display.display(fig)
+                    image_data, cmap=self.colormap,
+                    vmin=self.data.get_data().min(),
+                    vmax=self.data.get_data().max())
+
+            if self.guidelines:
+                # add "cross hair"
+                x, y = (idx if idim != 2 else self.data.shape[2] - idx
+                        for idim, idx in enumerate(self.indices[:3])
+                        if idim != iimage)
+                # if idim == 2 and 'z':
+                #     y = self.controls['z']
+                ax.lines = [ax.axvline(x=x, color='gray'),
+                            ax.axhline(y=y, color='gray')]
+            else:
+                ax.lines = []
+
+        self._redraw()
+
+    @traitlets.observe('orient_radiology')
+    def _update_orientation(self, change):
+        for i, ax in enumerate(self.axes):
+            if change is not None:
+                ax.invert_xaxis()
+            ax.texts = []
+            if self.orient_radiology:
+                if i == 0:
+                    ax.text(-0.01, 0.5, 'F', transform=ax.transAxes,
+                            horizontalalignment='right',
+                            verticalalignment='center',
+                            fontsize=16)
+                    ax.text(1.01, 0.5, 'P', transform=ax.transAxes,
+                            horizontalalignment='left',
+                            verticalalignment='center',
+                            fontsize=16)
+                elif i == 1 or i == 2:
+                    ax.text(-0.01, 0.5, 'R', transform=ax.transAxes,
+                            horizontalalignment='right',
+                            verticalalignment='center',
+                            fontsize=16)
+                    ax.text(1.01, 0.5, 'L', transform=ax.transAxes,
+                            horizontalalignment='left',
+                            verticalalignment='center',
+                            fontsize=16)
+            else:
+                if i == 0:
+                    ax.text(-0.01, 0.5, 'P', transform=ax.transAxes,
+                            horizontalalignment='right',
+                            verticalalignment='center',
+                            fontsize=16)
+                    ax.text(1.01, 0.5, 'F', transform=ax.transAxes,
+                            horizontalalignment='left',
+                            verticalalignment='center',
+                            fontsize=16)
+                elif i == 1 or i == 2:
+                    ax.text(-0.01, 0.5, 'L', transform=ax.transAxes,
+                            horizontalalignment='right',
+                            verticalalignment='center',
+                            fontsize=16)
+                    ax.text(1.01, 0.5, 'R', transform=ax.transAxes,
+                            horizontalalignment='left',
+                            verticalalignment='center',
+                            fontsize=16)
+
+        self._redraw()
+
+    @traitlets.observe('colormap', 'reverse_colors')
+    def _update_colormap(self, change):
+        for image in self.images:
+            if self.reverse_colors:
+                image.set_cmap(self.colormap + '_r')
+            else:
+                image.set_cmap(self.colormap)
+        self._redraw()
 
     def _generate_axes(self, figsize=(5, 5)):
         plt.ioff()  # to avoid figure duplication
@@ -387,11 +467,21 @@ class VolumeWidget(traitlets.HasTraits):
             ax.set_title(title)
             ax.set_axis_off()
 
+    def _redraw(self):
+        for fig, disp in zip(self.figures, self.displays):
+            with disp:
+                display.clear_output(wait=True)
+                display.display(fig)
+
     def render(self):
         """Build the widget view and return it."""
         self.layout = widgets.VBox([
             widgets.Box([self.controls[dim] for dim in self.dims],
                         layout={'flex_flow': 'row wrap'}),
+            widgets.HBox([self.color_picker, self.color_reverser,
+                          self.guideline_picker, self.orientation_switcher],
+                         # layout={'flex_flow': 'row wrap'}
+                         ),
             widgets.Box(self.displays, layout={'flex_flow': 'row wrap'})
         ])
         return self.layout
