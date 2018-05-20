@@ -26,16 +26,6 @@ class PlaySlider(widgets.HBox):
                 step=step, continuous_update=continuous_update
             )
         ])
-        # set the children
-        # self.children = [
-        #     widgets.Label(label + ': '),
-        #     widgets.Play(min=min, max=max, value=value,
-        #                  interval=interval),
-        #     widgets.IntSlider(
-        #         min=min, max=max, value=value,
-        #         step=step, continuous_update=continuous_update
-        #     )
-        # ]
         for trait in ('min', 'max', 'value', 'step'):
             # first the two control elements:
             widgets.link((self.children[1], trait), (self.children[2], trait))
