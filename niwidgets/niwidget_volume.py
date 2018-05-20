@@ -7,9 +7,12 @@ import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
 import scipy.ndimage
+import traitlets
+from IPython import display
 from ipywidgets import IntSlider, fixed, interact
 
 from .colormaps import get_cmap_dropdown
+from .controls import PlaySlider
 
 
 class NiftiWidget:
@@ -280,7 +283,7 @@ class NiftiWidget:
         plt.show()
 
 
-class VolumeWidget:
+class VolumeWidget(traitlets.HasTraits):
     """Turn .nii files into interactive plots using ipywidgets.
 
     Args
@@ -289,8 +292,14 @@ class VolumeWidget:
                 The path to your ``.nii`` file. Can be a string, or a
                 ``PosixPath`` from python3's pathlib.
     """
+    # the indices are traitlets that can be linked:
+    x = traitlets.Integer(0)
+    y = traitlets.Integer(0)
+    z = traitlets.Integer(0)
+    t = traitlets.Integer(0)
+    colormap = traitlets.Unicode('viridis')
 
-    def __init__(self, filename):
+    def __init__(self, filename, figsize=(5, 5)):
         """
         Turn .nii files into interactive plots using ipywidgets.
 
@@ -300,6 +309,7 @@ class VolumeWidget:
                     The path to your ``.nii`` file. Can be a string, or a
                     ``PosixPath`` from python3's pathlib.
         """
+
         if hasattr(filename, 'get_data'):
             self.data = filename
         else:
@@ -309,18 +319,92 @@ class VolumeWidget:
             # load data to ensures that the file readable by nibabel
             self.data = nib.load(str(filename))
 
+        self.displays = [widgets.Output() for _ in range(3)]
+        self._generate_axes(figsize=figsize)
+
         # set how many dimensions this file has
         self.ndim = len(self.data.shape)
-        # initialise where the image handles will go
-        self.image_handles = None
 
         # initialise the control components of this widget
-        for i, dim in enumerate(['x', 'y', 'z', 't'][:self.ndim]):
-            self.sliders[dim] = widgets.IntSlider(
-                min=0, max=self.data.shape[i] - 1,
-                value=self.data.shape[i] // 2,
-                step=1
+        self.dims = ['x', 'y', 'z', 't'][:self.ndim]
+        self.controls = {}
+        for i, dim in enumerate(self.dims):
+
+            maxval = self.data.shape[i] - 1
+
+            self.controls[dim] = PlaySlider(
+                min=0, max=maxval, value=maxval // 2, inteval=500,
+                label=dim.upper(), continuous_update=False
             )
 
-    def _plot_slices():
-        pass
+            widgets.link((self.controls[dim], 'value'),
+                         (self, dim))
+
+    @property
+    def indices(self):
+        return [self.x, self.y, self.z, self.t]
+
+    @traitlets.observe('x', 'y', 'z', 't')
+    def _update_slices(self, change):
+        array = self.data.get_data()
+
+        if self.ndim == 3:
+            array = array[:, :, :, np.newaxis]
+
+        for iimage, (disp, fig, ax, image) in enumerate(
+                zip(self.displays, self.figures, self.axes, self.images)):
+            if image is not None:
+                image.set_data(
+                    np.fliplr(np.rot90(array[
+                        tuple(slice(None) if iimage != idim
+                              else self.indices[idim]
+                              for idim in range(3))
+                        + (self.t,)
+                    ]))
+                )
+            else:
+                self.images[iimage] = ax.imshow(
+                    np.fliplr(np.rot90(array[
+                        tuple(slice(None) if iimage != idim
+                              else self.indices[idim]
+                              for idim in range(3))
+                        + (self.t,)
+                    ])),
+                    cmap=self.colormap, vmin=self.data.get_data().min(),
+                    vmax=self.data.get_data().max()
+                )
+            with disp:
+                display.clear_output(wait=True)
+                display.display(fig)
+
+    def _generate_axes(self, figsize=(5, 5)):
+        plt.ioff()  # to avoid figure duplication
+        self.figures, self.axes = zip(*[plt.subplots(1, 1, figsize=figsize)
+                                        for _ in range(3)])
+
+        self.images = [None] * 3
+        for ax, title in zip(self.axes, ['Sagittal', 'Coronal', 'Axial']):
+            ax.set_title(title)
+            ax.set_axis_off()
+
+    def render(self):
+        """Build the widget view and return it."""
+        self.layout = widgets.VBox([
+            widgets.Box([self.controls[dim] for dim in self.dims],
+                        layout={'flex_flow': 'row wrap'}),
+            widgets.Box(self.displays, layout={'flex_flow': 'row wrap'})
+        ])
+        return self.layout
+
+    def _ipython_display_(self):
+        """This gets called instead of __repr__ in ipython."""
+        display.display(self.render())
+
+    def close(self):
+        """Close all figures created for this widget."""
+        for fig in self.figures:
+            plt.close(fig)  # to avoid matplotlib warnings
+
+    def __del__(self):
+        """Method to tidy up afterwards."""
+        self.close()
