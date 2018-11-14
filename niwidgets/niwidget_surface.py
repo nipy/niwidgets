@@ -22,9 +22,11 @@ def _check_file(file):
     elif os.path.isfile(str(file)):
         return str(file)
     else:
-        raise ValueError('The argument meshfile needs to either be '
-                         'a nibabel Gifti image or an existing file, '
-                         'but ' + str(file) + ' was provided.')
+        raise ValueError(
+            "The argument meshfile needs to either be "
+            "a nibabel Gifti image or an existing file, "
+            "but " + str(file) + " was provided."
+        )
 
 
 def _get_name(file):
@@ -68,12 +70,12 @@ class SurfaceWidget:
             self.overlayfiles = overlayfiles
         elif isinstance(overlayfiles, (list, tuple)):
             self.overlayfiles = {
-                _get_name(file): _check_file(file)
-                for file in overlayfiles
+                _get_name(file): _check_file(file) for file in overlayfiles
             }
         else:
-            self.overlayfiles = {_get_name(overlayfiles):
-                                 _check_file(overlayfiles)}
+            self.overlayfiles = {
+                _get_name(overlayfiles): _check_file(overlayfiles)
+            }
 
         self.fig = None
 
@@ -91,24 +93,37 @@ class SurfaceWidget:
         """
         self.fig = p3.figure(width=figsize[0], height=figsize[1])
         self.fig.camera_fov = 1
-        self.fig.style = {'axes': {'color': 'black',
-                                   'label': {'color': 'black'},
-                                   'ticklabel': {'color': 'black'},
-                                   'visible': False},
-                          'background-color': 'white',
-                          'box': {'visible': False}}
+        self.fig.style = {
+            "axes": {
+                "color": "black",
+                "label": {"color": "black"},
+                "ticklabel": {"color": "black"},
+                "visible": False,
+            },
+            "background-color": "white",
+            "box": {"visible": False},
+        }
         self.fig.xlim = (figlims[0][0], figlims[0][1])
         self.fig.ylim = (figlims[1][0], figlims[1][1])
         self.fig.zlim = (figlims[2][0], figlims[2][1])
 
         # draw the tetrahedron
-        p3.plot_trisurf(x, y, z, triangles=triangles,
-                        color=np.ones((len(x), 3)))
+        p3.plot_trisurf(
+            x, y, z, triangles=triangles, color=np.ones((len(x), 3))
+        )
 
-    def _plot_surface(self, x, y, z, triangles,
-                      overlays=None, frame=0,
-                      colormap='summer', figsize=np.array([600, 600]),
-                      figlims=np.array(3 * [[-100, 100]])):
+    def _plot_surface(
+        self,
+        x,
+        y,
+        z,
+        triangles,
+        overlays=None,
+        frame=0,
+        colormap="summer",
+        figsize=np.array([600, 600]),
+        figlims=np.array(3 * [[-100, 100]]),
+    ):
         """
         Visualize/update the overlay.
 
@@ -127,8 +142,10 @@ class SurfaceWidget:
             # activation = overlays[:, frame]
             activation = overlays[frame]
             if max(activation) - min(activation) > 0:
-                colors = my_color((activation - min(activation))
-                                  / (max(activation) - min(activation)))
+                colors = my_color(
+                    (activation - min(activation))
+                    / (max(activation) - min(activation))
+                )
             else:
                 colors = my_color((activation - min(activation)))
             self.fig.meshes[0].color = colors[:, :3]
@@ -167,9 +184,14 @@ class SurfaceWidget:
 
         return ~mask_kill, mask_kill
 
-    def surface_plotter(self, colormap=None, figsize=np.array([600, 600]),
-                        figlims=np.array(3 * [[-100, 100]]),
-                        show_zeroes=True, **kwargs):
+    def surface_plotter(
+        self,
+        colormap=None,
+        figsize=np.array([600, 600]),
+        figlims=np.array(3 * [[-100, 100]]),
+        show_zeroes=True,
+        **kwargs
+    ):
         """Visualise a surface mesh (with overlay) inside notebooks.
 
         This method displays the surface widget.
@@ -194,13 +216,13 @@ class SurfaceWidget:
             Display vertices with intensity = 0, default True
 
         """
-        kwargs['colormap'] = get_cmap_dropdown(colormap)
-        kwargs['figsize'] = fixed(figsize)
-        kwargs['figlims'] = fixed(figlims)
+        kwargs["colormap"] = get_cmap_dropdown(colormap)
+        kwargs["figsize"] = fixed(figsize)
+        kwargs["figlims"] = fixed(figlims)
 
         if isinstance(self.meshfile, str):
             # if mesh has not been loaded before, load it
-            if os.path.splitext(self.meshfile)[1].lower() == '.gii':
+            if os.path.splitext(self.meshfile)[1].lower() == ".gii":
                 # load gifti file
                 try:
                     self.meshfile = nb.load(self.meshfile)
@@ -208,8 +230,9 @@ class SurfaceWidget:
                     vertex_edges = self.meshfile.darrays[1].data
                 except ExpatError:
                     raise ValueError(
-                        'The file {} could not be read. '.format(self.meshfile)
-                        + 'Please provide a valid gifti file.')
+                        "The file {} could not be read. ".format(self.meshfile)
+                        + "Please provide a valid gifti file."
+                    )
             else:
                 # load freesurfer file
                 fsgeometry = nb.freesurfer.read_geometry(self.meshfile)
@@ -233,32 +256,35 @@ class SurfaceWidget:
                 else:
                     file_ext = os.path.splitext(overlayfile)[1].lower()
 
-                    if file_ext == '.gii':
+                    if file_ext == ".gii":
                         try:
                             overlay = nb.load(overlayfile)
                             overlays[key] = overlay.darrays[0].data
                         except ExpatError:
                             raise ValueError(
-                                'The file {} could not be read. '
-                                .format(overlayfile)
-                                + 'Please provide a valid gifti file.')
+                                "The file {} could not be read. ".format(
+                                    overlayfile
+                                )
+                                + "Please provide a valid gifti file."
+                            )
 
-                    elif (file_ext in ('.annot', '')):
+                    elif file_ext in (".annot", ""):
                         annot = nb.freesurfer.read_annot(overlayfile)
                         overlays[key] = annot[0]
 
-                    elif (file_ext in ('.curv', '.thickness', '.sulc')):
+                    elif file_ext in (".curv", ".thickness", ".sulc"):
                         overlays[key] = nb.freesurfer.read_morph_data(
-                            overlayfile)
+                            overlayfile
+                        )
 
                     if not show_zeroes:
                         pass
 
-        kwargs['triangles'] = fixed(vertex_edges)
-        kwargs['x'] = fixed(x)
-        kwargs['y'] = fixed(y)
-        kwargs['z'] = fixed(z)
-        kwargs['overlays'] = fixed(overlays)
+        kwargs["triangles"] = fixed(vertex_edges)
+        kwargs["x"] = fixed(x)
+        kwargs["y"] = fixed(y)
+        kwargs["z"] = fixed(z)
+        kwargs["overlays"] = fixed(overlays)
 
         if len(self.overlayfiles) < 2:
             frame = fixed(None)
@@ -266,7 +292,7 @@ class SurfaceWidget:
             frame = Dropdown(
                 options=list(self.overlayfiles.keys()),
                 value=list(self.overlayfiles.keys())[0],
-                description='Overlay:'
+                description="Overlay:",
             )
 
         interact(self._plot_surface, frame=frame, **kwargs)
