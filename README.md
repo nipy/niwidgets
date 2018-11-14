@@ -1,5 +1,12 @@
 # Neuroimaging Widgets (`niwidgets`)
 
+---
+
+[![PyPI version](https://badge.fury.io/py/niwidgets.svg)](https://badge.fury.io/py/niwidgets)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![Python versions](https://img.shields.io/badge/python-3.5%2B-blue.svg)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+
 This repository is supposed to provide easy and general wrappers to display
 interactive widgets that visualise standard-format neuroimaging data, using new
 functions and standard functions from other libraries. It looks like this:
