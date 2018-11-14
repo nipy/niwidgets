@@ -8,7 +8,7 @@ matrix:
       dist: xenial
       sudo: true
 script:
-  - pip install flake8
+  - pip install -qq flake8 coverage coveralls
   - flake8 niwidgets
   - pip install -qq -e '.[tests]'
   - coverage run --source=niwidgets -m pytest
