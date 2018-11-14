@@ -1,3 +1,4 @@
+# flake8: noqa E203
 from __future__ import print_function
 
 import os
@@ -133,12 +134,12 @@ class StreamlineWidget:
                 2,
             )[1:-1]
             indices[
-                line_offset : line_offset + line_length * 2 - 2
+                line_offset : (line_offset + line_length * 2 - 2)
             ] = line_indices
             line_pointers.append([line_offset, line_length, line_indices])
-            colors[vertex_offset : vertex_offset + line_length] = local_colors[
-                idx
-            ]
+            colors[
+                vertex_offset : (vertex_offset + line_length)
+            ] = local_colors[idx]
             line_offset += line_length * 2 - 2
             vertex_offset += line_length
         return x, y, z, indices, colors, line_pointers
