@@ -29,12 +29,11 @@ setup(
     download_url='https://github.com/nipy/niwidgets/archive/' +
         version + '.tar.gz',
     # Author details
-    author='Bjoern Soergel & Jan Freyberg',
-    author_email='jan.freyberg@gmail.com',
-    packages=['niwidgets'],
-    keywords=['widgets', 'neuroimaging'],
-    install_requires=['ipywidgets', 'nibabel', 'ipyvolume',
-                      'matplotlib', 'numpy', 'scipy'],
+    install_requires=requirements,
+    extras_require={
+        "tests": testing_requirements,
+        "documentation": documentation_requirements,
+    },
     # Include the template file
     package_data={
         '': ['data/*nii*',
