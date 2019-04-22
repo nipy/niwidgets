@@ -33,7 +33,7 @@ jobs:
     - stage: "Static code analysis"
       name: "flake8 check"
       script:
-        - pip install -qq flake8 docargs
+        - pip install -qq flake8
         - flake8 src/
       python: "3.7"
       install: skip
