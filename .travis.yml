@@ -26,17 +26,17 @@ jobs:
     - stage: "Static code analysis"
       name: "black formatting test"
       script:
-        - pip install -qq black
         - black --check src/
       python: "3.7"
-      install: skip
+      install:
+        - pip install -qq black
     - stage: "Static code analysis"
       name: "flake8 check"
       script:
-        - pip install -qq flake8
         - flake8 src/
       python: "3.7"
-      install: skip
+      install:
+        - pip install -qq flake8
     - stage: deploy
       name: "Deploy to pypi"
       if: tag IS present
