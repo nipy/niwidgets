@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "niwidgets"
+version = "0.2.1"
+description = "'Interactive jupyter widgets for neuroimaging.'"
+authors = ["Jan Freyberg <jan.freyberg@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.5"
+ipywidgets = "^7.4"
+nibabel = "^2.4"
+ipyvolume = "^0.5.1"
+matplotlib = "^3.0"
+numpy = "^1.16"
+scipy = "^1.2"
+
+[tool.poetry.dev-dependencies]
+jupyterlab = "^0.35.4"
+pytest = "^4.4"
+sphinx = "^2.0"
+sphinx_bootstrap_theme = "^0.7.1"
+nbsphinx = "^0.4.2"
+jupyter_sphinx = "^0.1.4"
+m2r = "^0.2.1"
+pytest-cov = "^2.6"
+coveralls = "^1.7"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
