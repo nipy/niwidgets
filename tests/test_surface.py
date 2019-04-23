@@ -1,4 +1,5 @@
-from niwidgets import SurfaceWidget, examplesurface
+from niwidgets import SurfaceWidget
+from niwidgets.exampledata import examplesurface
 
 
 def test_creation():
