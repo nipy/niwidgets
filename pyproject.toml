@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "niwidgets"
-version = "0.2.1"
+version = "0.2.2"
 description = "'Interactive jupyter widgets for neuroimaging.'"
 authors = ["Jan Freyberg <jan.freyberg@gmail.com>", "Bjoern Soergel"]
 readme = "README.md"
