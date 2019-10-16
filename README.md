@@ -47,7 +47,7 @@ different overlays for the surface files.
 using `ipyvolume`.
 
 To see how to use these widgets, please check the
-[documentation](nipy.org/niwidgets).
+[documentation](https://nipy.org/niwidgets).
 
 As an example of how you might generate a Volume widget:
 
