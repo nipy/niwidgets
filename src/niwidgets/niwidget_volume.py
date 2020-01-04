@@ -2,6 +2,8 @@
 import inspect
 import os.path
 
+import warnings
+
 import ipywidgets as widgets
 import matplotlib.pyplot as plt
 import nibabel as nib
@@ -35,6 +37,11 @@ class NiftiWidget:
                     The path to your ``.nii`` file. Can be a string, or a
                     ``PosixPath`` from python3's pathlib.
         """
+        warnings.warn(
+            "NiftiWidget has been deprecated, please use VolumeWidget instead."
+            " NiftiWidget will be removed in version 0.3.0",
+            DeprecationWarning,
+        )
         if hasattr(filename, "get_data"):
             self.data = filename
         else:
@@ -583,7 +590,6 @@ class VolumeWidget(traitlets.HasTraits):
         self._redraw()
 
     def _generate_axes(self, figsize=(5, 5)):
-        plt.ioff()  # to avoid figure duplication
         self.figures, self.axes = zip(
             *[plt.subplots(1, 1, figsize=figsize) for _ in range(3)]
         )
