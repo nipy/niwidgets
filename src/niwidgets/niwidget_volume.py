@@ -194,7 +194,9 @@ class NiftiWidget:
             imh.set_data(
                 np.flipud(np.rot90(data[tuple(slice_obj)], k=1))
                 if views[ii] != "Sagittal"
-                else np.fliplr(np.flipud(np.rot90(data[tuple(slice_obj)], k=1)))
+                else np.fliplr(
+                    np.flipud(np.rot90(data[tuple(slice_obj)], k=1))
+                )
             )
 
             # draw guides to show selected coordinates
